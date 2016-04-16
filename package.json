@@ -1,0 +1,14 @@
+{
+  "name": "webblocks",
+  "version": "0.1.0",
+  "description": "three.js socket.io multiplayer block game thing",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.13.4",
+    "socket.io": "^1.4.5",
+    "three": "^0.75.0"
+  }
+}
