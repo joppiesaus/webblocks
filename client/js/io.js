@@ -5,17 +5,19 @@ socket.on( 'connect', function( data ) {
 
     // Remove "Connecting..." message
     var el = document.getElementById( 'connectingmsg' );
-    el.parentElement.removeChild( el );
+    if (el) {
+        el.parentElement.removeChild( el );
+    }
 
     socket.emit( 'requestOldPlayers', {} );
 });
 
-socket.on( 'update' , function( data ) {
-    game.updatePlayer( data );
-});
-
 socket.on( 'updateVariable', function( data ) {
     game.updatePlayerVariable( data );
+});
+
+socket.on( 'updatePlayerPosition', function( data ) {
+    game.updatePlayerPosition( data );
 });
 
 socket.on( 'createPlayer', function( data ) {

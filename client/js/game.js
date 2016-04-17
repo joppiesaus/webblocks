@@ -15,7 +15,7 @@ Game.prototype.createOtherPlayer = function( p ) {
 
     var player = new THREE.Mesh( geometry, material );
     player.userData.id = p.id;
-    player.position = p.position;
+    player.position.set( p.position.x, p.position.y, p.position.z );
     scene.add( player );
     this.world.players[ p.id ] = player;
 
@@ -46,27 +46,17 @@ Game.prototype.updatePlayer = function( p ) {
 
 };
 
-Game.prototype.updatePlayerVariable = function( data ) {
+Game.prototype.updatePlayerPosition = function( data ) {
 
-    // ASDFJKLASDKFJASKLDFJASL TODO BREAKS IF YOU PUT ANYTHING DIFFERENT IN THEN A VECTOR3
-    console.log(data);
-    var vec = new THREE.Vector3( data.val.x, data.val.y, data.val.z );
-    console.log(vec);
-    //this.world.players[ data.id ][ data.variable ] = vec;//data.val;
-    console.log(this.world.players[ data.id ]);
     this.world.players[ data.id ].position.set( data.val.x, data.val.y, data.val.z );
 
-    ///////////////A AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    //(atom is very laggy)
-    //(fix)
-}
-
-Game.prototype.sendPlayerUpdate = function() {
-
-    // TODO: TEMP TEMP TEMP FIND SOLUTION FOR THE PROTOTYPE PROBLEM TO ARRAY IS
-    socket.emit( 'update', { id: this.player.userData.id, position: this.player.position } );
-
 };
+
+Game.prototype.updatePlayerVariable = function( data ) {
+
+    this.world.players[ data.id ][ data.variable ] = data.val;
+
+}
 
 Game.prototype.sendPlayerUpdateVariable = function( variable, val ) {
 
@@ -74,12 +64,20 @@ Game.prototype.sendPlayerUpdateVariable = function( variable, val ) {
 
 };
 
+Game.prototype.sendPlayerUpdatePosition = function() {
+
+    socket.emit( 'updatePlayerPosition', { id: this.player.userData.id, val: this.player.position } );
+
+};
+
 Game.prototype.init = function() {
+
     var light = new THREE.AmbientLight( 0x404040 );
     scene.add( light );
 
     camera.position.set( 3, 1, 1 );
     camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
 };
 
 Game.prototype.update = function( delta ) {
@@ -91,9 +89,6 @@ Game.prototype.update = function( delta ) {
     var playerspeed = 1 * delta * 5;
     var prev = this.player.position.clone();
 
-    //console.log('WTF' + playerspeed);
-
-
     if ( InputManager.isKeyDown( 87 /*w*/ ) ) {
         this.player.position.z += playerspeed;
     }
@@ -101,10 +96,9 @@ Game.prototype.update = function( delta ) {
         this.player.position.z -= playerspeed;
     }
 
-    //console.log( prev.z !== this.player.position.z );
-
     if ( prev.z !== this.player.position.z ) {
-        this.sendPlayerUpdateVariable( 'position', this.player.position );
+        this.sendPlayerUpdatePosition();
+        camera.lookAt( this.player.position );
     }
 };
 

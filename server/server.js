@@ -6,7 +6,11 @@ var Player = function(id) {
 
     this.id = id;
     this.name = '';
-    this.position = new THREE.Vector3( 0, 0, 0 ); // will not work FIX
+    this.position = new THREE.Vector3(
+        Math.random() * 2.0,
+        0,
+        Math.random() * 2.0
+    );
     this.color = Math.random() * 0xffffff;
 };
 

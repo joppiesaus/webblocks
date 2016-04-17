@@ -27,14 +27,14 @@ io.on('connection', function(socket) {
         }
     });
 
-    socket.on('update', function(data) {
-        var newData = world.updatePlayerData(data);
-        socket.broadcast.emit('update', newData);
-    });
-
     socket.on('updateVariable', function(data) {
         world.updatePlayerVariable(data.id, data.variable, data.val);
         socket.broadcast.emit('updateVariable', data);
+    });
+
+    socket.on('updatePlayerPosition', function(data) {
+        world.updatePlayerVariable(data.id, 'position', data.val);
+        socket.broadcast.emit('updatePlayerPosition', data);
     });
 
     socket.on('disconnect', function() {
