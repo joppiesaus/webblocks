@@ -4,16 +4,21 @@ socket.on( 'connect', function( data ) {
     console.info( 'connected' );
 
     // Remove "Connecting..." message
-    var el = document.getElementById( 'connectingmsg' );
-    if (el) {
-        el.parentElement.removeChild( el );
-    }
+    document.getElementById( 'msg' ).textContent = "Click to play";
 
     socket.emit( 'requestOldPlayers', {} );
 });
 
+socket.on( 'disconnect', function( data ) {
+    document.getElementById( 'msg' ).textContent = "Reconnecting...";
+});
+
 socket.on( 'updateVariable', function( data ) {
     game.updatePlayerVariable( data );
+});
+
+socket.on( 'updatePlayerVector3', function( data ) {
+    game.updatePlayerVector3( data );
 });
 
 socket.on( 'updatePlayerPosition', function( data ) {

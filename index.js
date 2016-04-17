@@ -37,6 +37,11 @@ io.on('connection', function(socket) {
         socket.broadcast.emit('updatePlayerPosition', data);
     });
 
+    socket.on('updatePlayerVector3', function(data) {
+        world.updatePlayerVariable(data.id, data.variable, data.val);
+        socket.broadcast.emit('updatePlayerVector3', data);
+    });
+
     socket.on('disconnect', function() {
         console.log('user ' + id + ' disconnected');
         io.emit('removeOtherPlayer', id);

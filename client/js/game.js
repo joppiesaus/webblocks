@@ -1,3 +1,5 @@
+var controls;
+
 var Game = function( data ) {
 
     this.world = {
@@ -10,7 +12,7 @@ var Game = function( data ) {
 
 Game.prototype.createOtherPlayer = function( p ) {
 
-    var geometry = new THREE.CubeGeometry( 1, 1, 1 );
+    var geometry = new THREE.CubeGeometry( 1, 2, 1 );
     var material = new THREE.MeshBasicMaterial( { color: p.color } );
 
     var player = new THREE.Mesh( geometry, material );
@@ -28,7 +30,12 @@ Game.prototype.createOtherPlayer = function( p ) {
 Game.prototype.createPlayer = function( p ) {
 
     // TODO: player is also inside player list
-    return this.player = this.createOtherPlayer( p );
+    if ( this.player ) {
+        // On a reconnect, remove the old one..?
+        scene.remove( this.player );
+    }
+    this.player = this.createOtherPlayer( p );
+    this.player.userData.velocity = new THREE.Vector3( 0, 0, 0 );
 
 };
 
@@ -52,15 +59,27 @@ Game.prototype.updatePlayerPosition = function( data ) {
 
 };
 
+Game.prototype.updatePlayerVector3 = function( data ) {
+
+    this.world.players[ data.id ][ data.variable ].set( data.val.x, data.val.y, data.val.z );
+
+};
+
 Game.prototype.updatePlayerVariable = function( data ) {
 
     this.world.players[ data.id ][ data.variable ] = data.val;
 
 }
 
-Game.prototype.sendPlayerUpdateVariable = function( variable, val ) {
+Game.prototype.sendPlayerUpdateVariable = function( variable ) {
 
-    socket.emit( 'updateVariable', { id: this.player.userData.id, variable: variable, val: val } );
+    socket.emit( 'updateVariable', { id: this.player.userData.id, variable: variable, val: this.player[ variable ] } );
+
+};
+
+Game.prototype.sendPlayerUpdateVector3 = function( variable ) {
+
+    socket.emit( 'updatePlayerVector3', { id: this.player.userData.id, variable: variable, val: this.player[ variable ] } );
 
 };
 
@@ -75,9 +94,14 @@ Game.prototype.init = function() {
     var light = new THREE.AmbientLight( 0x404040 );
     scene.add( light );
 
-    camera.position.set( 3, 1, 1 );
-    camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+    var oGeometry = new THREE.TorusKnotGeometry( 10, 3, 64, 8 );
+    var oMaterial = new THREE.MeshNormalMaterial();
+    var orientationPoint = new THREE.Mesh( oGeometry, oMaterial );
+    orientationPoint.position.set( 0, 0, 0 );
+    scene.add( orientationPoint );
 
+    controls = new THREE.PointerLockControls( camera );
+    scene.add( controls.getObject() );
 };
 
 Game.prototype.update = function( delta ) {
@@ -86,19 +110,37 @@ Game.prototype.update = function( delta ) {
         return;
     }
 
-    var playerspeed = 1 * delta * 5;
+    var playerspeed = 1 * delta * 250.0;
+    var cObject = controls.getObject();
     var prev = this.player.position.clone();
 
+    this.player.userData.velocity.x -= this.player.userData.velocity.x * 10.0 * delta;
+    this.player.userData.velocity.z -= this.player.userData.velocity.z * 10.0 * delta;
+
     if ( InputManager.isKeyDown( 87 /*w*/ ) ) {
-        this.player.position.z += playerspeed;
+        this.player.userData.velocity.z -= playerspeed;
     }
     if ( InputManager.isKeyDown( 83 /*s*/ ) ) {
-        this.player.position.z -= playerspeed;
+        this.player.userData.velocity.z += playerspeed;
+    }
+    if ( InputManager.isKeyDown( 65 /*a*/ ) ) {
+        this.player.userData.velocity.x -= playerspeed;
+    }
+    if ( InputManager.isKeyDown( 68 /*d*/ ) ) {
+        this.player.userData.velocity.x += playerspeed;
     }
 
-    if ( prev.z !== this.player.position.z ) {
-        this.sendPlayerUpdatePosition();
-        camera.lookAt( this.player.position );
+    cObject.translateX( this.player.userData.velocity.x * delta );
+    cObject.translateY( this.player.userData.velocity.y * delta );
+    cObject.translateZ( this.player.userData.velocity.z * delta );
+
+    this.player.position.set( cObject.position.x, cObject.position.y, cObject.position.z );
+
+    if ( prev.x !== this.player.position.x ||
+         prev.y !== this.player.position.y ||
+         prev.z !== this.player.position.z ) {
+        //this.sendPlayerUpdatePosition();
+        this.sendPlayerUpdateVector3( 'position' );
     }
 };
 
