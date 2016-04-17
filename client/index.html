@@ -10,11 +10,11 @@
         overflow: hidden;
     }
     #blocker {
-        display: none; /* REMOVE FOR PRODUCTION */
 		position: absolute;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(0,0,0,0.3);
+        background-color: rgba(0,0,0,0.5);
+        background-color: rgba(0,0,0,0.0); /* REMOVE FOR PRODUCTION */
     }
 	#instructions {
 		width: 100%;
@@ -53,8 +53,10 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="lib/three.min.js"></script>
+    <script src="js/constants.js"></script>
     <script src="lib/pointerlock.js"></script>
     <script src="lib/inputmanager.js"></script>
+    <script src="js/block.js"></script>
 
     <script src="js/game.js"></script>
     <script src="js/io.js"></script>

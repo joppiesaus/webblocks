@@ -104,6 +104,22 @@ Game.prototype.init = function() {
     scene.add( controls.getObject() );
 };
 
+Game.prototype.initLevel = function( data ) {
+
+    this.world.level = data;
+
+    for ( var i = 0; i < this.world.level.blocks.length; i++ ) {
+
+        var blockdata = this.world.level.blocks[ i ];
+        var block = new Block();
+        block.importData( blockdata );
+        block.setup();
+        this.world.level.blocks[ i ] = block;
+
+    }
+
+};
+
 Game.prototype.update = function( delta ) {
 
     if ( !this.player ) {

@@ -6,6 +6,8 @@ var world = require('./server/server');
 
 app.use(express.static('client'));
 
+var level = world.generateLevel();
+
 io.on('connection', function(socket) {
 
     var id = socket.id;
@@ -25,6 +27,10 @@ io.on('connection', function(socket) {
                 socket.emit('createOtherPlayer', world.players[key]);
             }
         }
+    });
+
+    socket.on('requestLevel', function() {
+        socket.emit('level', level);
     });
 
     socket.on('updateVariable', function(data) {

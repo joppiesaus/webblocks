@@ -38,4 +38,16 @@ exports.removePlayer = function(player) {
     delete players[player.id];
 };
 
+exports.generateLevel = function() {
+    var level = { blocks: [] };
+
+    for (var x = 0; x < 12; x++) {
+        for (var z = 0; z < 12; z++){
+            level.blocks.push({ id: Math.floor( Math.random() * 2 ) + 1, position: { x: x, y: -1, z: z }});
+        }
+    }
+
+    return level;
+};
+
 exports.players = players;

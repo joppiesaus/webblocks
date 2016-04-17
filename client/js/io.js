@@ -7,10 +7,15 @@ socket.on( 'connect', function( data ) {
     document.getElementById( 'msg' ).textContent = "Click to play";
 
     socket.emit( 'requestOldPlayers', {} );
+    socket.emit( 'requestLevel', {} );
 });
 
 socket.on( 'disconnect', function( data ) {
     document.getElementById( 'msg' ).textContent = "Reconnecting...";
+});
+
+socket.on( 'level', function( data ) {
+    game.initLevel( data );
 });
 
 socket.on( 'updateVariable', function( data ) {
