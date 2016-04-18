@@ -1,4 +1,5 @@
 var game, socket;
+var stats;
 
 var camera, scene, renderer, timer;
 
@@ -16,6 +17,11 @@ var init = function()
     document.body.appendChild( renderer.domElement );
 
     window.addEventListener( "resize", onWindowResize, false );
+    //window.addEventListener( "mousemove", game.onMouseMove, false );
+
+    stats = new Stats();
+    stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( stats.dom );
 };
 
 var onWindowResize = function()
@@ -37,6 +43,8 @@ var animate = function()
 
     var delta = timer.getDelta();
 
+    stats.begin();
+
     game.update( delta );
     InputManager.update();
 
@@ -44,6 +52,8 @@ var animate = function()
     {
         renderer.render( scene, camera );
     }
+
+    stats.end();
 };
 
 

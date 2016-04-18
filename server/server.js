@@ -41,10 +41,15 @@ exports.removePlayer = function(player) {
 exports.generateLevel = function() {
     var level = { blocks: [] };
 
-    for (var x = 0; x < 12; x++) {
-        for (var z = 0; z < 12; z++){
-            level.blocks.push({ id: Math.floor( Math.random() * 2 ) + 1, position: { x: x, y: -1, z: z }});
-        }
+    var SIZE = 64;
+    var y = -1;
+
+    for (var x = 0; x < SIZE; x++) {
+        //for (var y = 0; y < SIZE; y++) {
+            for (var z = 0; z < SIZE; z++) {
+                level.blocks.push({ id: Math.floor( Math.random() * 2 ) + 1, position: { x: x, y: y, z: z }});
+            }
+        //}
     }
 
     return level;

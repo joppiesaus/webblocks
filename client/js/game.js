@@ -160,6 +160,15 @@ Game.prototype.update = function( delta ) {
     }
 };
 
+Game.prototype.onMouseMove = function( evnt ) {
+
+    var raycaster = new Raycaster();
+    raycaster.setFromCamera( new Vector2( 0, 0 ), camera );
+
+    var intersects = raycaster.intersectsObjects( this.game.world.blocks );
+
+};
+
 Game.prototype.mustRender = function() {
     return true;
 };
