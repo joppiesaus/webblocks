@@ -41,7 +41,7 @@ exports.removePlayer = function(player) {
 exports.generateLevel = function() {
     var level = { blocks: [] };
 
-    var SIZE = 64;
+    var SIZE = 16;
     var y = -1;
 
     for (var x = 0; x < SIZE; x++) {

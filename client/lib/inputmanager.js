@@ -1,5 +1,8 @@
 var InputManager =
 {
+    LEFT_MOUSE_BUTTON: 1,
+    RIGHT_MOUSE_BUTTON: 3,
+
     keys: [],
     oldKeys: [],
 

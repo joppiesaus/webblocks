@@ -94,14 +94,141 @@ Game.prototype.init = function() {
     var light = new THREE.AmbientLight( 0x404040 );
     scene.add( light );
 
-    var oGeometry = new THREE.TorusKnotGeometry( 10, 3, 64, 8 );
+    // torus knot as orientation point
+    /*var oGeometry = new THREE.TorusKnotGeometry( 10, 3, 64, 8 );
     var oMaterial = new THREE.MeshNormalMaterial();
     var orientationPoint = new THREE.Mesh( oGeometry, oMaterial );
     orientationPoint.position.set( 0, 0, 0 );
-    scene.add( orientationPoint );
+    scene.add( orientationPoint );*/
+
+    window.addEventListener( 'mouseup', this.mouseUp, false );
+    window.addEventListener( 'mousedown', this.mouseDown, false );
 
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
+};
+
+Game.prototype.mouseDown = function( evnt ) {
+
+    switch ( evnt.which ) {
+
+        case InputManager.LEFT_MOUSE_BUTTON:
+            game.leftMouseDown = true;
+            game.addBlockAtCrosshair();
+            break;
+
+        case InputManager.RIGHT_MOUSE_BUTTON:
+            game.rightMouseDown = true;
+            game.removeBlockAtCrosshair();
+            break;
+
+        default:
+            break;
+    }
+
+};
+
+Game.prototype.mouseUp = function( evnt ) {
+
+    switch ( evnt.which ) {
+
+        case InputManager.LEFT_MOUSE_BUTTON:
+            game.leftMouseDown = false;
+            break;
+
+        case InputManager.RIGHT_MOUSE_BUTTON:
+            game.rightMouseDown = false;
+            break;
+
+        default:
+            break;
+    }
+
+};
+
+Game.prototype.getMeshArray = function( blocks ) {
+
+    var result = [];
+
+    blocks.forEach( b => {
+        result.push( b.mesh );
+    });
+
+    return result;
+
+};
+
+
+// TODO: Server side
+Game.prototype.addBlockAtCrosshair = function() {
+
+    var raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
+
+    var intersects = raycaster.intersectObjects( this.getMeshArray( this.world.level.blocks ), false );
+
+    if ( intersects.length > 0 ) {
+
+        var collided = intersects[ 0 ];
+        var collidedPosition = collided.point;
+        var collidedBlock = collided.object;
+
+        var delta = collidedPosition.clone();
+        delta.sub( collidedBlock.position );
+
+        var absDelta = new THREE.Vector3(
+            Math.abs( delta.x ),
+            Math.abs( delta.y ),
+            Math.abs( delta.z )
+        );
+
+        var biggest = { var: 'x', val: absDelta.x };
+        if ( absDelta.y > biggest.val ) {
+            biggest.var = 'y';
+            biggest.val = absDelta.y;
+        }
+        if ( absDelta.z > biggest.val ) {
+            biggest.var = 'z';
+            //biggest.val = absDelta.z;
+        }
+
+        var finalPosition = collidedBlock.position.clone();
+        finalPosition[ biggest.var ] += delta[ biggest.var ] > 0 ? 1 : -1;
+
+
+        var block = new Block( 2 );
+        block.position = finalPosition;
+        block.setup();
+
+        socket.emit( 'blockAdd', block.exportData() );
+        this.world.level.blocks.push( block );
+    }
+
+};
+
+Game.prototype.removeBlockAtCrosshair = function() {
+
+    var raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
+
+    var intersects = raycaster.intersectObjects( this.getMeshArray( this.world.level.blocks ), false );
+
+    if ( intersects.length > 0 ) {
+
+        var block = intersects[ 0 ].object;
+
+        // TODO: remove
+
+    }
+};
+
+Game.prototype.addBlockFromServer = function( data ) {
+
+    var block = new Block();
+    block.importData( data );
+    block.setup();
+    this.world.level.blocks.push( block );
+
 };
 
 Game.prototype.initLevel = function( data ) {
@@ -131,6 +258,7 @@ Game.prototype.update = function( delta ) {
     var prev = this.player.position.clone();
 
     this.player.userData.velocity.x -= this.player.userData.velocity.x * 10.0 * delta;
+    this.player.userData.velocity.y -= this.player.userData.velocity.y * 10.0 * delta;
     this.player.userData.velocity.z -= this.player.userData.velocity.z * 10.0 * delta;
 
     if ( InputManager.isKeyDown( 87 /*w*/ ) ) {
@@ -144,6 +272,12 @@ Game.prototype.update = function( delta ) {
     }
     if ( InputManager.isKeyDown( 68 /*d*/ ) ) {
         this.player.userData.velocity.x += playerspeed;
+    }
+    if ( InputManager.isKeyDown( 32 /*spacebar*/ ) ) {
+        this.player.userData.velocity.y += playerspeed;
+    }
+    if ( InputManager.isKeyDown( 16 /*shift*/ ) ) {
+        this.player.userData.velocity.y -= playerspeed;
     }
 
     cObject.translateX( this.player.userData.velocity.x * delta );

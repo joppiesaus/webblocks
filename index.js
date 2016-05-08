@@ -29,6 +29,11 @@ io.on('connection', function(socket) {
         }
     });
 
+    socket.on('blockAdd', function(data) {
+        level.blocks.push(data);
+        socket.broadcast.emit('blockAdd', data);
+    });
+
     socket.on('requestLevel', function() {
         socket.emit('level', level);
     });

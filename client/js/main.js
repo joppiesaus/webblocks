@@ -17,7 +17,6 @@ var init = function()
     document.body.appendChild( renderer.domElement );
 
     window.addEventListener( "resize", onWindowResize, false );
-    //window.addEventListener( "mousemove", game.onMouseMove, false );
 
     stats = new Stats();
     stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom

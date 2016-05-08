@@ -18,6 +18,10 @@ socket.on( 'level', function( data ) {
     game.initLevel( data );
 });
 
+socket.on( 'blockAdd', function( data ) {
+    game.addBlockFromServer( data );
+});
+
 socket.on( 'updateVariable', function( data ) {
     game.updatePlayerVariable( data );
 });
