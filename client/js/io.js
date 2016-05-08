@@ -14,6 +14,10 @@ socket.on( 'disconnect', function( data ) {
     document.getElementById( 'msg' ).textContent = "Reconnecting...";
 });
 
+socket.on( 'message', function( data ) {
+    console.log( data );
+});
+
 socket.on( 'level', function( data ) {
     game.initLevel( data );
 });

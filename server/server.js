@@ -1,17 +1,20 @@
 var THREE = require('three');
 
 var players = {};
+var playerCount = 1;
 
 var Player = function(id) {
 
     this.id = id;
-    this.name = '';
+    this.name = 'Player ' + playerCount;
     this.position = new THREE.Vector3(
         Math.random() * 2.0,
         0,
         Math.random() * 2.0
     );
     this.color = Math.random() * 0xffffff;
+
+    playerCount++;
 };
 
 exports.addPlayer = function(id) {

@@ -1,3 +1,4 @@
+// TODO: Update conventions so that server and client are equal
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -27,6 +28,16 @@ io.on('connection', function(socket) {
                 socket.emit('createOtherPlayer', world.players[key]);
             }
         }
+    });
+
+    socket.on( 'message', function( data ) {
+        var message = player.name + ': ' + data;
+        console.log( message );
+        socket.broadcast.emit( 'message', message );
+    });
+
+    socket.on( 'command', function( data ) {
+        socket.emit( 'message', 'No!' );
     });
 
     socket.on('blockAdd', function(data) {
