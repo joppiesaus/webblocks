@@ -19,11 +19,11 @@ socket.on( 'message', function( data ) {
 });
 
 socket.on( 'level', function( data ) {
-    game.initLevel( data );
+    game.world.level.importData( data );
 });
 
 socket.on( 'blockAdd', function( data ) {
-    game.addBlockFromServer( data );
+    game.world.level.addBlockFromServer( data );
 });
 
 socket.on( 'updateVariable', function( data ) {

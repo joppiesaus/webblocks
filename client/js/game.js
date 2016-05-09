@@ -2,9 +2,7 @@ var controls;
 
 var Game = function( data ) {
 
-    this.world = {
-        players: {},
-    }
+    this.world = new World();
     this.player = null;
 
     this.init();
@@ -222,31 +220,6 @@ Game.prototype.removeBlockAtCrosshair = function() {
     }
 };
 
-Game.prototype.addBlockFromServer = function( data ) {
-
-    var block = new Block();
-    block.importData( data );
-    block.setup();
-    this.world.level.blocks.push( block );
-
-};
-
-Game.prototype.initLevel = function( data ) {
-
-    this.world.level = data;
-
-    for ( var i = 0; i < this.world.level.blocks.length; i++ ) {
-
-        var blockdata = this.world.level.blocks[ i ];
-        var block = new Block();
-        block.importData( blockdata );
-        block.setup();
-        this.world.level.blocks[ i ] = block;
-
-    }
-
-};
-
 Game.prototype.update = function( delta ) {
 
     if ( !this.player ) {
@@ -292,14 +265,6 @@ Game.prototype.update = function( delta ) {
         //this.sendPlayerUpdatePosition();
         this.sendPlayerUpdateVector3( 'position' );
     }
-};
-
-Game.prototype.onMouseMove = function( evnt ) {
-
-    var raycaster = new Raycaster();
-    raycaster.setFromCamera( new Vector2( 0, 0 ), camera );
-
-    var intersects = raycaster.intersectsObjects( this.game.world.blocks );
 
 };
 
