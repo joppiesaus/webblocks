@@ -33,6 +33,7 @@ Game.prototype.createPlayer = function( p ) {
         scene.remove( this.player );
     }
     this.player = this.createOtherPlayer( p );
+    controls.getObject().position.copy( this.player.position );
     this.player.userData.velocity = new THREE.Vector3( 0, 0, 0 );
 
 };
@@ -258,7 +259,7 @@ Game.prototype.update = function( delta ) {
     cObject.translateY( this.player.userData.velocity.y * delta );
     cObject.translateZ( this.player.userData.velocity.z * delta );
 
-    this.player.position.set( cObject.position.x, cObject.position.y, cObject.position.z );
+    this.player.position.copy( cObject.position );
 
     if ( prev.x !== this.player.position.x ||
          prev.y !== this.player.position.y ||

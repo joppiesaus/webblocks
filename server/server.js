@@ -9,7 +9,7 @@ var Player = function( id ) {
     this.name = 'Player ' + playerCount;
     this.position = new THREE.Vector3(
         Math.random() * 2.0,
-        1,
+        2,
         Math.random() * 2.0
     );
     this.color = Math.random() * 0xffffff;
