@@ -9,7 +9,7 @@ var Player = function( id ) {
     this.name = 'Player ' + playerCount;
     this.position = new THREE.Vector3(
         Math.random() * 2.0,
-        0,
+        1,
         Math.random() * 2.0
     );
     this.color = Math.random() * 0xffffff;
@@ -45,17 +45,24 @@ exports.generateLevel = function() {
     var level = { blocks: [ ] };
 
     var SIZE = 16;
-    var y = -1;
 
     for ( var x = 0; x < SIZE; x++ ) {
-        //for ( var y = 0; y < SIZE; y++ ) {
+        var yArr = [ ];
+        for ( var y = 0; y < SIZE; y++ ) {
+            var zArr = [ ];
             for ( var z = 0; z < SIZE; z++ ) {
-                level.blocks.push( {
-                    id: Math.floor( Math.random() * 2 ) + 1,
-                    position: { x: x, y: y, z: z }
-                } );
+                if ( y === 0 ) {
+                    zArr.push( {
+                        id: Math.floor( Math.random() * 2 ) + 1,
+                        position: { x: x, y: y, z: z }
+                    } );
+                } else {
+                    zArr.push( undefined );
+                }
             }
-        //}
+            yArr.push( zArr );
+        }
+        level.blocks.push( yArr );
     }
 
     return level;

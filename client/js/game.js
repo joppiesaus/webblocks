@@ -144,12 +144,16 @@ Game.prototype.mouseUp = function( evnt ) {
 
 };
 
-Game.prototype.getMeshArray = function( blocks ) {
+Game.prototype.getBlockMeshArray = function() {
 
     var result = [];
 
-    blocks.forEach( b => {
-        result.push( b.mesh );
+    this.world.level.forEachBlock( block => {
+
+        if ( block.mesh ) {
+            result.push( block.mesh );
+        }
+
     });
 
     return result;
@@ -163,7 +167,7 @@ Game.prototype.addBlockAtCrosshair = function() {
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
 
-    var intersects = raycaster.intersectObjects( this.getMeshArray( this.world.level.blocks ), false );
+    var intersects = raycaster.intersectObjects( this.getBlockMeshArray(), false );
 
     if ( intersects.length > 0 ) {
 
@@ -196,10 +200,7 @@ Game.prototype.addBlockAtCrosshair = function() {
 
         var block = new Block( 2 );
         block.position = finalPosition;
-        block.setup();
-
-        socket.emit( 'blockAdd', block.exportData() );
-        this.world.level.blocks.push( block );
+        this.world.level.addBlock( block );
     }
 
 };
@@ -209,13 +210,13 @@ Game.prototype.removeBlockAtCrosshair = function() {
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
 
-    var intersects = raycaster.intersectObjects( this.getMeshArray( this.world.level.blocks ), false );
+    var intersects = raycaster.intersectObjects( this.getBlockMeshArray(), false );
 
     if ( intersects.length > 0 ) {
 
         var block = intersects[ 0 ].object;
 
-        // TODO: remove
+        this.world.level.removeBlockAtPosition( block.position );
 
     }
 };

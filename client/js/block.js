@@ -34,6 +34,11 @@ Block.prototype = {
 
         // temporary
 
+        if ( !this.id ) {
+            // Air
+            return;
+        }
+
         var color = 0;
 
         switch ( this.id ) {
@@ -60,9 +65,24 @@ Block.prototype = {
 
     },
 
+    remove: function() {
+
+        this.id = 0;
+        this.removeFromScene();
+        socket.emit( 'blockRemove', { position: this.position } );
+
+    },
+
+    removeFromServer: function() {
+
+        this.id = 0;
+        this.removeFromScene();
+
+    },
+
     removeFromScene: function() {
 
-        if ( !this.mesh ) {
+        if ( this.mesh ) {
 
             scene.remove( this.mesh );
             this.mesh = undefined;
