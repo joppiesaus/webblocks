@@ -5,6 +5,7 @@
 // from http://threejs.org/examples/#misc_controls_pointerlock, slightly modified
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
+var crosshair = document.getElementById( 'crosshair' );
 
 // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
@@ -32,6 +33,7 @@ if ( havePointerLock ) {
 			blocker.style.display = 'box';
 
 			instructions.style.display = '';
+			crosshair.style.display = 'none';
 
 		}
 
@@ -55,6 +57,7 @@ if ( havePointerLock ) {
 	instructions.addEventListener( 'click', function ( event ) {
 
 		instructions.style.display = 'none';
+		crosshair.style.display = '';
 
 		// Ask the browser to lock the pointer
 		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;

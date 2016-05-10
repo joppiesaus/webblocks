@@ -40,6 +40,14 @@
 		text-align: center;
 		cursor: pointer;
 	}
+    #crosshair {
+        font-family: monospace;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5em;
+    }
 </style>
 </head>
 <body>
@@ -50,6 +58,7 @@
             (W, A, S, D = Move, MOUSE = Look around)
         </div>
     </div>
+    <span id="crosshair">+</span>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="lib/three.min.js"></script>

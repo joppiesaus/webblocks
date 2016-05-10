@@ -39,8 +39,13 @@ io.on( 'connection', function( socket ) {
     });
 
     socket.on( 'blockAdd', function( data ) {
-        level.blocks.push( data );
+        level.blocks[ data.position.x ][ data.position.y ][ data.position.z ] = data;
         socket.broadcast.emit( 'blockAdd', data );
+    });
+
+    socket.on( 'blockRemove', function( data ) {
+        level.blocks[ data.position.x ][ data.position.y ][ data.position.z ] = undefined;
+        socket.broadcast.emit( 'blockRemove', data );
     });
 
     socket.on( 'requestLevel', function() {

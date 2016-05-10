@@ -26,6 +26,10 @@ socket.on( 'blockAdd', function( data ) {
     game.world.level.addBlockFromServer( data );
 });
 
+socket.on( 'blockRemove', function( data ) {
+    game.world.level.removeBlockFromServer( data );
+});
+
 socket.on( 'updateVariable', function( data ) {
     game.updatePlayerVariable( data );
 });

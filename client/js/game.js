@@ -33,6 +33,7 @@ Game.prototype.createPlayer = function( p ) {
         scene.remove( this.player );
     }
     this.player = this.createOtherPlayer( p );
+    controls.getObject().position.copy( this.player.position );
     this.player.userData.velocity = new THREE.Vector3( 0, 0, 0 );
 
 };
@@ -144,12 +145,16 @@ Game.prototype.mouseUp = function( evnt ) {
 
 };
 
-Game.prototype.getMeshArray = function( blocks ) {
+Game.prototype.getBlockMeshArray = function() {
 
     var result = [];
 
-    blocks.forEach( b => {
-        result.push( b.mesh );
+    this.world.level.forEachBlock( block => {
+
+        if ( block.mesh ) {
+            result.push( block.mesh );
+        }
+
     });
 
     return result;
@@ -163,7 +168,7 @@ Game.prototype.addBlockAtCrosshair = function() {
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
 
-    var intersects = raycaster.intersectObjects( this.getMeshArray( this.world.level.blocks ), false );
+    var intersects = raycaster.intersectObjects( this.getBlockMeshArray(), false );
 
     if ( intersects.length > 0 ) {
 
@@ -193,13 +198,15 @@ Game.prototype.addBlockAtCrosshair = function() {
         var finalPosition = collidedBlock.position.clone();
         finalPosition[ biggest.var ] += delta[ biggest.var ] > 0 ? 1 : -1;
 
+        if ( finalPosition[ biggest.var ] < 0 ||
+            finalPosition[ biggest.var ] >= this.world.level.size[ biggest.var ] ) {
+                return;
+        }
 
         var block = new Block( 2 );
         block.position = finalPosition;
-        block.setup();
+        this.world.level.addBlock( block );
 
-        socket.emit( 'blockAdd', block.exportData() );
-        this.world.level.blocks.push( block );
     }
 
 };
@@ -209,13 +216,13 @@ Game.prototype.removeBlockAtCrosshair = function() {
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
 
-    var intersects = raycaster.intersectObjects( this.getMeshArray( this.world.level.blocks ), false );
+    var intersects = raycaster.intersectObjects( this.getBlockMeshArray(), false );
 
     if ( intersects.length > 0 ) {
 
         var block = intersects[ 0 ].object;
 
-        // TODO: remove
+        this.world.level.removeBlockAtPosition( block.position );
 
     }
 };
@@ -257,7 +264,7 @@ Game.prototype.update = function( delta ) {
     cObject.translateY( this.player.userData.velocity.y * delta );
     cObject.translateZ( this.player.userData.velocity.z * delta );
 
-    this.player.position.set( cObject.position.x, cObject.position.y, cObject.position.z );
+    this.player.position.copy( cObject.position );
 
     if ( prev.x !== this.player.position.x ||
          prev.y !== this.player.position.y ||
