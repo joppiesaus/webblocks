@@ -42,16 +42,17 @@ exports.removePlayer = function( player ) {
 };
 
 exports.generateLevel = function() {
-    var level = { blocks: [ ] };
 
     var SIZE = 16;
+
+    var level = { blocks: [ ], size: { x: SIZE, y: SIZE, z: SIZE } };
 
     for ( var x = 0; x < SIZE; x++ ) {
         var yArr = [ ];
         for ( var y = 0; y < SIZE; y++ ) {
             var zArr = [ ];
             for ( var z = 0; z < SIZE; z++ ) {
-                if ( y === 0 ) {
+                if ( y === 0 || ( x === 0 && z === 0 ) ) {
                     zArr.push( {
                         id: Math.floor( Math.random() * 2 ) + 1,
                         position: { x: x, y: y, z: z }

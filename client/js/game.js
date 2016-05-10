@@ -198,10 +198,15 @@ Game.prototype.addBlockAtCrosshair = function() {
         var finalPosition = collidedBlock.position.clone();
         finalPosition[ biggest.var ] += delta[ biggest.var ] > 0 ? 1 : -1;
 
+        if ( finalPosition[ biggest.var ] < 0 ||
+            finalPosition[ biggest.var ] >= this.world.level.size[ biggest.var ] ) {
+                return;
+        }
 
         var block = new Block( 2 );
         block.position = finalPosition;
         this.world.level.addBlock( block );
+
     }
 
 };

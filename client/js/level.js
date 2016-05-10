@@ -7,6 +7,8 @@ var Level = function() {
 
 Level.prototype.importData = function( data ) {
 
+    this.size = new THREE.Vector3( data.size.x, data.size.y, data.size.z );
+
     for ( var x = 0; x < data.blocks.length; x++ ) {
 
         var xArr = [ ];
@@ -46,6 +48,15 @@ Level.prototype.importData = function( data ) {
 };
 
 Level.prototype.exportData = function() {
+
+};
+
+
+Level.prototype.isOutOfBounds = function( position ) {
+
+    return position.x < 0 || position.x >= this.size.x ||
+        position.y < 0 || position.y >= this.size.y ||
+        position.z < 0 || position.y >= this.size.z;
 
 };
 
