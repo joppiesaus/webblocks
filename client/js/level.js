@@ -9,6 +9,8 @@ Level.prototype.importData = function( data ) {
 
     this.size = new THREE.Vector3( data.size.x, data.size.y, data.size.z );
 
+    var meshes = [ ];
+
     for ( var x = 0; x < data.blocks.length; x++ ) {
 
         var xArr = [ ];
@@ -24,6 +26,9 @@ Level.prototype.importData = function( data ) {
                 if ( data.blocks[ x ][ y ][ z ] ) {
 
                     block.importData( data.blocks[ x ][ y ][ z ] );
+                    block.setup();
+                    meshes.push( block.mesh );
+                    scene.remove( block.mesh );
 
                 } else {
 
@@ -32,7 +37,6 @@ Level.prototype.importData = function( data ) {
 
                 }
 
-                block.setup();
                 yArr.push( block );
 
             }
@@ -44,6 +48,10 @@ Level.prototype.importData = function( data ) {
         this.blocks.push( xArr );
 
     }
+
+    var geometry = utils.mergeMeshes( meshes );
+    mesh = new THREE.Mesh( geometry, constants.Meshes[ 2 ].material.clone() );
+    scene.add( mesh );
 
 };
 
