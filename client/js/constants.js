@@ -1,12 +1,22 @@
 var constants = {
+
     Blocksize: 1,
+
+    Meshes: [ ],
+
 };
 
 (function(){
 
-    var material = new THREE.MeshBasicMaterial();
     var geometry = new THREE.CubeGeometry( constants.Blocksize, constants.Blocksize, constants.Blocksize );
+    var material;
 
-    constants.CubeMesh = new THREE.Mesh( geometry, material );
+    // block
+    material = new THREE.MeshNormalMaterial();
+    constants.Meshes[ 1 ] = new THREE.Mesh( geometry, material.clone() );
+
+    // another block
+    material = new THREE.MeshBasicMaterial( { color: 0x669999 } );
+    constants.Meshes[ 2 ] = new THREE.Mesh( geometry, material.clone() );
 
 })();

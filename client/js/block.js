@@ -39,27 +39,8 @@ Block.prototype = {
             return;
         }
 
-        var color = 0;
-
-        switch ( this.id ) {
-
-            case 1:
-                color = 0x00ff00;
-                break;
-            case 2:
-                color = 0xffffff * Math.random();
-                break;
-
-        }
-
-        /*this.mesh = constants.CubeMesh.clone();
-        this.mesh.material.color = new THREE.Color( color );*/
-
-        //var geometry = new THREE.CubeGeometry( constants.Blocksize, constants.Blocksize, constants.Blocksize );
-        //var material = new THREE.MeshBasicMaterial( { color: color } );
-        this.mesh = constants.CubeMesh.clone();//new THREE.Mesh( constants.CubeMesh.geometry.clone(), material );
-        this.mesh.material = new THREE.MeshBasicMaterial( { color: color } );
-        this.mesh.position.copy( this.realWorldPosition() );
+        this.mesh = constants.Meshes[ this.id ].clone();
+        this.mesh.position.copy( this.position );
 
         scene.add( this.mesh );
 
