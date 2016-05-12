@@ -5,9 +5,31 @@ var Level = function() {
 
 };
 
+Level.prototype.mergeBlocks = function( blocks ) {
+
+    var combined = new THREE.Geometry();
+
+    for ( var i = 0; i < blocks.length; i++ ) {
+
+        // TODO: Delete block meshes, replace with matrix offsets
+        // TODO: Just display the faces that are visible
+        blocks[ i ].mesh.updateMatrix();
+        combined.merge(
+            blocks[ i ].mesh.geometry,
+            blocks[ i ].mesh.matrix
+        );
+
+    }
+
+    return combined;
+
+};
+
 Level.prototype.importData = function( data ) {
 
     this.size = new THREE.Vector3( data.size.x, data.size.y, data.size.z );
+
+    var blocks = [ ];
 
     for ( var x = 0; x < data.blocks.length; x++ ) {
 
@@ -24,6 +46,9 @@ Level.prototype.importData = function( data ) {
                 if ( data.blocks[ x ][ y ][ z ] ) {
 
                     block.importData( data.blocks[ x ][ y ][ z ] );
+                    block.setup();
+
+                    blocks.push( block );
 
                 } else {
 
@@ -32,7 +57,6 @@ Level.prototype.importData = function( data ) {
 
                 }
 
-                block.setup();
                 yArr.push( block );
 
             }
@@ -44,6 +68,20 @@ Level.prototype.importData = function( data ) {
         this.blocks.push( xArr );
 
     }
+
+    var geometry = this.mergeBlocks( blocks );
+
+    var materials = [ ];
+
+    for ( var i = 0; i < constants.Meshes.length; i++ ) {
+        materials.push( constants.Meshes[ i ].material );
+    }
+
+    var material = new THREE.MeshFaceMaterial( materials );
+
+    var mesh = new THREE.Mesh( geometry, material );
+
+    scene.add( mesh );
 
 };
 

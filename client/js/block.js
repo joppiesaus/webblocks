@@ -42,7 +42,7 @@ Block.prototype = {
         this.mesh = constants.Meshes[ this.id ].clone();
         this.mesh.position.copy( this.position );
 
-        scene.add( this.mesh );
+        //scene.add( this.mesh );
 
     },
 
