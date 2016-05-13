@@ -1,9 +1,16 @@
-var constants = {
+const constants = {
 
-    Blocksize: 1,
+    Blocksize: 0x1,
     Chunksize: 0x10,
 
+};
+
+var blockdata = {
+
     Meshes: [ ],
+    Materials: [ ],
+
+    ChunkMaterial: null,
 
 };
 
@@ -26,14 +33,22 @@ var constants = {
     var material;
 
     // You're just here to fill the array
-    constants.Meshes[ 0 ] = new THREE.Mesh( createGeometry( 0 ), new THREE.MeshBasicMaterial() );
+    blockdata.Meshes[ 0 ] = new THREE.Mesh( createGeometry( 0 ), new THREE.MeshBasicMaterial() );
 
     // block
     material = new THREE.MeshNormalMaterial();
-    constants.Meshes[ 1 ] = new THREE.Mesh( createGeometry( 1 ), material.clone() );
+    blockdata.Meshes[ 1 ] = new THREE.Mesh( createGeometry( 1 ), material.clone() );
 
     // another block
     material = new THREE.MeshBasicMaterial( { color: 0x669999 } );
-    constants.Meshes[ 2 ] = new THREE.Mesh( createGeometry( 2 ), material.clone() );
+    blockdata.Meshes[ 2 ] = new THREE.Mesh( createGeometry( 2 ), material.clone() );
+
+
+    // Setup material array
+    for ( var i = 0; i < blockdata.Meshes.length; i++ ) {
+        blockdata.Materials.push( blockdata.Meshes[ i ].material );
+    }
+
+    blockdata.ChunkMaterial = new THREE.MeshFaceMaterial( blockdata.Materials );
 
 })();

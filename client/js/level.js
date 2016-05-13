@@ -2,6 +2,7 @@
 var Level = function() {
 
     this.blocks = [];
+    this.chunks = [];
 
 };
 
@@ -69,19 +70,61 @@ Level.prototype.importData = function( data ) {
 
     }
 
-    var geometry = this.mergeBlocks( blocks );
+    for ( var xc = 0; xc < this.size.x / constants.Chunksize; xc++ ) {
 
-    var materials = [ ];
+        var xcArr = [ ];
 
-    for ( var i = 0; i < constants.Meshes.length; i++ ) {
-        materials.push( constants.Meshes[ i ].material );
+        for ( var yc = 0; yc < this.size.y / constants.Chunksize; yc++ ) {
+
+            var ycArr = [ ];
+
+            for ( var zc = 0; zc < this.size.z / constants.Chunksize; zc++ ) {
+
+                // TODO: Pick all blocks for that chunk, push them to the chunk
+
+                var cblocks = [ ];
+
+                for ( var x = xc * constants.Chunksize; x < ( xc + 1 ) * constants.Chunksize; x++ ) {
+
+                    var yArr = [ ];
+
+                    for ( var y = yc * constants.Chunksize; y < ( yc + 1 ) * constants.Chunksize; y++ ) {
+
+                        yArr.push(
+                            this.blocks[ x ][ y ]
+                            .slice( zc * constants.Chunksize, ( zc + 1 ) * constants.Chunksize )
+                        );
+
+                    }
+
+                    cblocks.push( yArr );
+
+                }
+
+                ycArr.push( new Chunk( cblocks ) );
+
+            }
+
+            xcArr.push( ycArr );
+
+        }
+
+        this.chunks.push( xcArr );
+
     }
 
-    var material = new THREE.MeshFaceMaterial( materials );
+    console.log( this.chunks );
 
-    var mesh = new THREE.Mesh( geometry, material );
+    this.forEachChunk( chunk => {
+        chunk.build();
+    });
 
-    scene.add( mesh );
+
+    /*var geometry = this.mergeBlocks( blocks );
+
+    var mesh = new THREE.Mesh( geometry, blockdata.ChunkMaterial );
+
+    scene.add( mesh );*/
 
 };
 
@@ -126,6 +169,33 @@ Level.prototype.addBlockFromServer = function( data ) {
     block.importData( data );
     block.setup();
     this.blocks[ block.position.x ][ block.position.y ][ block.position.z ] = block;
+
+};
+
+Level.prototype.getBlock = function( position ) {
+
+    return
+        this.chunks
+        [ Math.floor( position.x / constants.Chunksize ) ]
+        [ Math.floor( position.y / constants.Chunksize ) ]
+        [ Math.floor( position.z / constants.Chunksize ) ]
+        .blocks
+        [ position.x % constants.Chunksize ]
+        [ position.y % constants.Chunksize ]
+        [ position.z % constants.Chunksize ]
+    ;
+
+};
+
+Level.prototype.forEachChunk = function( func ) {
+
+    for ( var x = 0; x < this.chunks.length; x++ ) {
+        for ( var y = 0; y < this.chunks[ x ].length; y++ ) {
+            for ( var z = 0; z < this.chunks[ x ][ y ].length; z++ ) {
+                func( this.chunks[ x ][ y ][ z ] );
+            }
+        }
+    }
 
 };
 

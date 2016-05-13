@@ -11,6 +11,7 @@ Block.prototype = {
     id: undefined,
     position: new THREE.Vector3(),
     mesh: undefined,
+    visible: true,
 
     importData: function( data ) {
 
@@ -39,7 +40,7 @@ Block.prototype = {
             return;
         }
 
-        this.mesh = constants.Meshes[ this.id ].clone();
+        this.mesh = blockdata.Meshes[ this.id ].clone();
         this.mesh.position.copy( this.position );
 
         //scene.add( this.mesh );
