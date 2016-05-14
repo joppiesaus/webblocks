@@ -35,6 +35,7 @@ Game.prototype.createPlayer = function( p ) {
     this.player = this.createOtherPlayer( p );
     controls.getObject().position.copy( this.player.position );
     this.player.userData.velocity = new THREE.Vector3( 0, 0, 0 );
+    this.player.userData.selectedBlock = 2;
 
 };
 
@@ -90,7 +91,7 @@ Game.prototype.sendPlayerUpdatePosition = function() {
 
 Game.prototype.init = function() {
 
-    var light = new THREE.AmbientLight( 0x404040 );
+    var light = new THREE.AmbientLight( /*0x404040*/ 0xffffff );
     scene.add( light );
 
     // torus knot as orientation point
@@ -190,7 +191,7 @@ Game.prototype.addBlockAtCrosshair = function() {
         // Block out of bounds
         if ( position[ v ] < 0 || position[ v ] >= this.world.level.size[ v ] ) return;
 
-        var block = new Block( 2 );
+        var block = new Block( this.player.userData.selectedBlock );
         block.position = position;
         this.world.level.addBlock( block );
 
@@ -259,6 +260,16 @@ Game.prototype.update = function( delta ) {
     }
     if ( InputManager.isKeyDown( 16 /*shift*/ ) ) {
         this.player.userData.velocity.y -= playerspeed;
+    }
+
+    if ( InputManager.isKeyPressed( 49 /*1*/ ) ) {
+        this.player.userData.selectedBlock = 1;
+    }
+    if ( InputManager.isKeyPressed( 50 /*2*/ ) ) {
+        this.player.userData.selectedBlock = 2;
+    }
+    if ( InputManager.isKeyPressed( 51 /*3*/ ) ) {
+        this.player.userData.selectedBlock = 3;
     }
 
     cObject.translateX( this.player.userData.velocity.x * delta );
