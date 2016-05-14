@@ -43,8 +43,6 @@ Block.prototype = {
         this.mesh = blockdata.Meshes[ this.id ].clone();
         this.mesh.position.copy( this.position );
 
-        //scene.add( this.mesh );
-
     },
 
     remove: function() {
@@ -70,14 +68,6 @@ Block.prototype = {
             this.mesh = undefined;
 
         }
-    },
-
-    realWorldPosition: function() {
-
-        var v = this.position.clone();
-        v.multiplyScalar( constants.Blocksize );
-        return v;
-
     },
 
 }

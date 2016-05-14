@@ -145,14 +145,14 @@ Game.prototype.mouseUp = function( evnt ) {
 
 };
 
-Game.prototype.getBlockMeshArray = function() {
+Game.prototype.getChunkMeshArray = function() {
 
     var result = [];
 
-    this.world.level.forEachBlock( block => {
+    this.world.level.forEachChunk( chunk => {
 
-        if ( block.mesh ) {
-            result.push( block.mesh );
+        if ( chunk.mesh ) {
+            result.push( chunk.mesh );
         }
 
     });
@@ -162,49 +162,36 @@ Game.prototype.getBlockMeshArray = function() {
 };
 
 
-// TODO: Server side
 Game.prototype.addBlockAtCrosshair = function() {
 
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
 
-    var intersects = raycaster.intersectObjects( this.getBlockMeshArray(), false );
+    var intersects = raycaster.intersectObjects( this.getChunkMeshArray(), false );
 
     if ( intersects.length > 0 ) {
 
-        var collided = intersects[ 0 ];
-        var collidedPosition = collided.point;
-        var collidedBlock = collided.object;
+        var intersect = intersects[ 0 ];
+        var position = intersect.point.clone();
+        var positionBackup = position.clone();
 
-        var delta = collidedPosition.clone();
-        delta.sub( collidedBlock.position );
+        position.round();
 
-        var absDelta = new THREE.Vector3(
-            Math.abs( delta.x ),
-            Math.abs( delta.y ),
-            Math.abs( delta.z )
-        );
+        var normal = intersect.face.normal;
 
-        var biggest = { var: 'x', val: absDelta.x };
-        if ( absDelta.y > biggest.val ) {
-            biggest.var = 'y';
-            biggest.val = absDelta.y;
-        }
-        if ( absDelta.z > biggest.val ) {
-            biggest.var = 'z';
-            //biggest.val = absDelta.z;
-        }
+        var v = 'x';
+        if ( normal.y ) v = 'y';
+        else if ( normal.z ) v = 'z';
 
-        var finalPosition = collidedBlock.position.clone();
-        finalPosition[ biggest.var ] += delta[ biggest.var ] > 0 ? 1 : -1;
+        position[ v ] = Math.floor( positionBackup[ v ] );
 
-        if ( finalPosition[ biggest.var ] < 0 ||
-            finalPosition[ biggest.var ] >= this.world.level.size[ biggest.var ] ) {
-                return;
-        }
+        if ( normal[ v ] > 0 ) position[ v ] += 1;
+
+        // Block out of bounds
+        if ( position[ v ] < 0 || position[ v ] >= this.world.level.size[ v ] ) return;
 
         var block = new Block( 2 );
-        block.position = finalPosition;
+        block.position = position;
         this.world.level.addBlock( block );
 
     }
@@ -216,13 +203,27 @@ Game.prototype.removeBlockAtCrosshair = function() {
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
 
-    var intersects = raycaster.intersectObjects( this.getBlockMeshArray(), false );
+    var intersects = raycaster.intersectObjects( this.getChunkMeshArray(), false );
 
     if ( intersects.length > 0 ) {
 
-        var block = intersects[ 0 ].object;
+        var intersect = intersects[ 0 ];
 
-        this.world.level.removeBlockAtPosition( block.position );
+        var position = intersect.point.clone();
+
+        var positionBackup = position.clone();
+
+        position.round();
+
+        var normal = intersect.face.normal;
+        var v = 'x';
+        if ( normal.y ) v = 'y';
+        else if ( normal.z ) v = 'z';
+
+        position[ v ] = Math.floor( positionBackup[ v ] );
+        if ( normal[ v ] < 0 ) position[ v ] += 1;
+
+        this.world.level.removeBlockAtPosition( position );
 
     }
 };

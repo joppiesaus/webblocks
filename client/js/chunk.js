@@ -15,11 +15,37 @@ Chunk.prototype.exportData = function() {
 
 };
 
+// Gives all the blocks in this chunk a .chunk property, pointing to this chunk
+Chunk.prototype.markBlocks = function() {
+
+    this.forEachBlock( block => {
+        block.chunk = this;
+    });
+
+};
+
+Chunk.prototype.forEachBlock = function( func ) {
+
+    for ( var x = 0; x < constants.Chunksize; x++ ) {
+
+        for ( var y = 0; y < constants.Chunksize; y++ ) {
+
+            for ( var z = 0; z < constants.Chunksize; z++ ) {
+
+                func( this.blocks[ x ][ y ][ z ] );
+
+            }
+
+        }
+
+    }
+
+}
+
 Chunk.prototype.build = function() {
 
     // Remove old mesh
     if ( this.mesh ) {
-        this.mesh.dispose();
         scene.remove( this.mesh );
     }
 

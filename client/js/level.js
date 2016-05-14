@@ -6,26 +6,6 @@ var Level = function() {
 
 };
 
-Level.prototype.mergeBlocks = function( blocks ) {
-
-    var combined = new THREE.Geometry();
-
-    for ( var i = 0; i < blocks.length; i++ ) {
-
-        // TODO: Delete block meshes, replace with matrix offsets
-        // TODO: Just display the faces that are visible
-        blocks[ i ].mesh.updateMatrix();
-        combined.merge(
-            blocks[ i ].mesh.geometry,
-            blocks[ i ].mesh.matrix
-        );
-
-    }
-
-    return combined;
-
-};
-
 Level.prototype.importData = function( data ) {
 
     this.size = new THREE.Vector3( data.size.x, data.size.y, data.size.z );
@@ -80,8 +60,6 @@ Level.prototype.importData = function( data ) {
 
             for ( var zc = 0; zc < this.size.z / constants.Chunksize; zc++ ) {
 
-                // TODO: Pick all blocks for that chunk, push them to the chunk
-
                 var cblocks = [ ];
 
                 for ( var x = xc * constants.Chunksize; x < ( xc + 1 ) * constants.Chunksize; x++ ) {
@@ -113,18 +91,9 @@ Level.prototype.importData = function( data ) {
 
     }
 
-    console.log( this.chunks );
-
     this.forEachChunk( chunk => {
         chunk.build();
     });
-
-
-    /*var geometry = this.mergeBlocks( blocks );
-
-    var mesh = new THREE.Mesh( geometry, blockdata.ChunkMaterial );
-
-    scene.add( mesh );*/
 
 };
 
@@ -141,25 +110,59 @@ Level.prototype.isOutOfBounds = function( position ) {
 
 };
 
-Level.prototype.addBlock = function( block, position ) {
+Level.prototype.addBlock = function( block ) {
 
-    if ( position ) block.position.copy( position );
+    var chunk = this.chunks
+        [ Math.floor( block.position.x / constants.Chunksize ) ]
+        [ Math.floor( block.position.y / constants.Chunksize ) ]
+        [ Math.floor( block.position.z / constants.Chunksize ) ];
 
-    this.blocks[ block.position.x ][ block.position.y ][ block.position.z ] = block;
     block.setup();
+
+    chunk.blocks
+        [ block.position.x % constants.Chunksize ]
+        [ block.position.y % constants.Chunksize ]
+        [ block.position.z % constants.Chunksize ]
+        = block;
+
+    chunk.build();
+
     socket.emit( 'blockAdd', block.exportData() );
 
 };
 
 Level.prototype.removeBlockAtPosition = function( position ) {
 
-    this.blocks[ position.x ][ position.y ][ position.z ].remove();
+    // TODO: Add chunk property to block for easy removing/adding?
+    var chunk = this.chunks
+        [ Math.floor( position.x / constants.Chunksize ) ]
+        [ Math.floor( position.y / constants.Chunksize ) ]
+        [ Math.floor( position.z / constants.Chunksize ) ];
+
+    chunk.blocks
+        [ position.x % constants.Chunksize ]
+        [ position.y % constants.Chunksize ]
+        [ position.z % constants.Chunksize ]
+        .remove();
+
+    chunk.build();
 
 };
 
 Level.prototype.removeBlockFromServer = function( data ) {
 
-    this.blocks[ data.position.x ][ data.position.y ][ data.position.z ].removeFromServer();
+    var chunk = this.chunks
+        [ Math.floor( data.position.x / constants.Chunksize ) ]
+        [ Math.floor( data.position.y / constants.Chunksize ) ]
+        [ Math.floor( data.position.z / constants.Chunksize ) ];
+
+    chunk.blocks
+        [ data.position.x % constants.Chunksize ]
+        [ data.position.y % constants.Chunksize ]
+        [ data.position.z % constants.Chunksize ]
+        .removeFromServer();
+
+    chunk.build();
 
 };
 
@@ -168,7 +171,19 @@ Level.prototype.addBlockFromServer = function( data ) {
     var block = new Block();
     block.importData( data );
     block.setup();
-    this.blocks[ block.position.x ][ block.position.y ][ block.position.z ] = block;
+
+    var chunk = this.chunks
+        [ Math.floor( block.position.x / constants.Chunksize ) ]
+        [ Math.floor( block.position.y / constants.Chunksize ) ]
+        [ Math.floor( block.position.z / constants.Chunksize ) ];
+
+    chunk.blocks
+        [ block.position.x % constants.Chunksize ]
+        [ block.position.y % constants.Chunksize ]
+        [ block.position.z % constants.Chunksize ]
+        = block;
+
+    chunk.build();
 
 };
 
@@ -193,18 +208,6 @@ Level.prototype.forEachChunk = function( func ) {
         for ( var y = 0; y < this.chunks[ x ].length; y++ ) {
             for ( var z = 0; z < this.chunks[ x ][ y ].length; z++ ) {
                 func( this.chunks[ x ][ y ][ z ] );
-            }
-        }
-    }
-
-};
-
-Level.prototype.forEachBlock = function( func ) {
-
-    for ( var x = 0; x < this.blocks.length; x++ ) {
-        for ( var y = 0; y < this.blocks[ x ].length; y++ ) {
-            for ( var z = 0; z < this.blocks[ x ][ y ].length; z++ ) {
-                func( this.blocks[ x ][ y ][ z ] );
             }
         }
     }
