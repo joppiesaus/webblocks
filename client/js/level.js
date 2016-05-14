@@ -137,7 +137,7 @@ Level.prototype.isOutOfBounds = function( position ) {
 
     return position.x < 0 || position.x >= this.size.x ||
         position.y < 0 || position.y >= this.size.y ||
-        position.z < 0 || position.y >= this.size.z;
+        position.z < 0 || position.z >= this.size.z;
 
 };
 
