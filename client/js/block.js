@@ -11,6 +11,7 @@ Block.prototype = {
     id: undefined,
     position: new THREE.Vector3(),
     mesh: undefined,
+    visible: true,
 
     importData: function( data ) {
 
@@ -39,29 +40,8 @@ Block.prototype = {
             return;
         }
 
-        var color = 0;
-
-        switch ( this.id ) {
-
-            case 1:
-                color = 0x00ff00;
-                break;
-            case 2:
-                color = 0xffffff * Math.random();
-                break;
-
-        }
-
-        /*this.mesh = constants.CubeMesh.clone();
-        this.mesh.material.color = new THREE.Color( color );*/
-
-        //var geometry = new THREE.CubeGeometry( constants.Blocksize, constants.Blocksize, constants.Blocksize );
-        //var material = new THREE.MeshBasicMaterial( { color: color } );
-        this.mesh = constants.CubeMesh.clone();//new THREE.Mesh( constants.CubeMesh.geometry.clone(), material );
-        this.mesh.material = new THREE.MeshBasicMaterial( { color: color } );
-        this.mesh.position.copy( this.realWorldPosition() );
-
-        scene.add( this.mesh );
+        this.mesh = blockdata.Meshes[ this.id ].clone();
+        this.mesh.position.copy( this.position );
 
     },
 
@@ -88,14 +68,6 @@ Block.prototype = {
             this.mesh = undefined;
 
         }
-    },
-
-    realWorldPosition: function() {
-
-        var v = this.position.clone();
-        v.multiplyScalar( constants.Blocksize );
-        return v;
-
     },
 
 }

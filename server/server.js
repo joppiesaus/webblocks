@@ -43,7 +43,7 @@ exports.removePlayer = function( player ) {
 
 exports.generateLevel = function() {
 
-    var SIZE = 16;
+    var SIZE = 64;
 
     var level = { blocks: [ ], size: { x: SIZE, y: SIZE, z: SIZE } };
 
@@ -54,7 +54,13 @@ exports.generateLevel = function() {
             for ( var z = 0; z < SIZE; z++ ) {
                 if ( y === 0 || ( x === 0 && z === 0 ) ) {
                     zArr.push( {
-                        id: Math.floor( Math.random() * 2 ) + 1,
+                        //id: Math.floor( Math.random() * 2 ) + 1,
+                        id: 1,
+                        position: { x: x, y: y, z: z }
+                    } );
+                } else if ( y === 1 && Math.floor( Math.random() * 3 ) === 0 ) {
+                    zArr.push( {
+                        id: 1,
                         position: { x: x, y: y, z: z }
                     } );
                 } else {
