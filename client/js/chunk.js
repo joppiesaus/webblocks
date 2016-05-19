@@ -54,14 +54,13 @@ Chunk.prototype.build = function() {
 
     var matrix = new THREE.Matrix4();
 
-    var surrounded = true;
     var scope = this;
 
     var isExternalBlock = function( pos, v, neg ) {
 
         if ( neg ) {
 
-            if ( scope.position[ v ] === 0 ) return surrounded = false;
+            if ( scope.position[ v ] === 0 ) return false;
 
             var p = scope.position.clone();
             var cPos = pos.clone();
@@ -71,13 +70,13 @@ Chunk.prototype.build = function() {
 
             if ( !game.world.level.chunks[ p.x ][ p.y ][ p.z ]
                 .blocks[ cPos.x ][ cPos.y ][ cPos.z ].id ) {
-                    return surrounded = false;
+                    return false;
             }
             return true;
 
         } else {
 
-            if ( scope.position[ v ] === game.world.level.chunkSize[ v ] - 1 ) return surrounded = false;
+            if ( scope.position[ v ] === game.world.level.chunkSize[ v ] - 1 ) return false;
 
             var p = scope.position.clone();
             var cPos = pos.clone();
@@ -87,7 +86,7 @@ Chunk.prototype.build = function() {
 
             if ( !game.world.level.chunks[ p.x ][ p.y ][ p.z ]
                 .blocks[ cPos.x ][ cPos.y ][ cPos.z ].id ) {
-                    return surrounded = false;
+                    return false;
             }
             return true;
 
@@ -107,9 +106,49 @@ Chunk.prototype.build = function() {
         p[ v ] += val;
 
         if ( !scope.blocks[ p.x ][ p.y ][ p.z ].id ) {
-            return surrounded = false;
+            return false;
         }
         return true;
+
+    };
+
+    var adjustGeometry = function( geo, pos ) {
+
+        var toDelete = [ ];
+
+        for ( var i = 0; i < geo.faces.length; i += 2 ) {
+
+            var normal = geo.faces[ i ].normal;
+
+            var v = 'x';
+            if ( normal.y ) v = 'y';
+            else if ( normal.z ) v = 'z';
+
+            val = normal[ v ];
+
+            // Block already there, may remove now
+            if ( isBlock( pos, v, val ) ) {
+                toDelete.push( i );
+            }
+
+        }
+
+        if ( toDelete.length * 2 == geo.faces.length ) {
+            return true;
+        }
+
+        for ( var i = 0; i < toDelete.length; i++ ) {
+            delete geo.faces[ toDelete[ i ] ];
+            delete geo.faces[ toDelete[ i ] + 1 ];
+        }
+
+        // uncomment for lolz
+        //delete geo.faces[ 5 ];
+
+        geo.faces = geo.faces.filter( v => v );
+        geo.elementsNeedUpdate = true;
+
+        return false;
 
     };
 
@@ -124,15 +163,9 @@ Chunk.prototype.build = function() {
 
                 surrounded = true;
                 var pos = new THREE.Vector3( x, y, z );
+                var bGeometry = blockdata.Meshes[ block.id ].geometry.clone();
 
-                isBlock( pos, 'x', -1 );
-                isBlock( pos, 'x', 1 );
-                isBlock( pos, 'y', -1 );
-                isBlock( pos, 'y', 1 );
-                isBlock( pos, 'z', -1 );
-                isBlock( pos, 'z', 1 );
-
-                if ( surrounded ) {
+                if ( adjustGeometry( bGeometry, pos ) ) {
                     continue;
                 }
 
@@ -146,7 +179,8 @@ Chunk.prototype.build = function() {
                 );
 
                 geometry.merge(
-                    blockdata.Meshes[ block.id ].geometry,
+                    //blockdata.Meshes[ block.id ].geometry,
+                    bGeometry,
                     matrix
                 );
 
