@@ -8,6 +8,7 @@ var Level = function() {
 Level.prototype.importData = function( data ) {
 
     this.size = new THREE.Vector3( data.size.x, data.size.y, data.size.z );
+    this.chunkSize = this.size.clone().divideScalar( constants.Chunksize ).floor();
 
     var blocks = [ ];
 
@@ -47,15 +48,15 @@ Level.prototype.importData = function( data ) {
 
     }
 
-    for ( var xc = 0; xc < this.size.x / constants.Chunksize; xc++ ) {
+    for ( var xc = 0; xc < this.chunkSize.x; xc++ ) {
 
         var xcArr = [ ];
 
-        for ( var yc = 0; yc < this.size.y / constants.Chunksize; yc++ ) {
+        for ( var yc = 0; yc < this.chunkSize.y; yc++ ) {
 
             var ycArr = [ ];
 
-            for ( var zc = 0; zc < this.size.z / constants.Chunksize; zc++ ) {
+            for ( var zc = 0; zc < this.chunkSize.z; zc++ ) {
 
                 var cblocks = [ ];
 
@@ -76,7 +77,7 @@ Level.prototype.importData = function( data ) {
 
                 }
 
-                ycArr.push( new Chunk( cblocks ) );
+                ycArr.push( new Chunk( cblocks, new THREE.Vector3( xc, yc, zc ) ) );
 
             }
 
