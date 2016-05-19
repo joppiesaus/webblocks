@@ -11,12 +11,13 @@ var blockdata = {
     Materials: [ ],
 
     ChunkMaterial: null,
+    BlockGeometry: null,
 
 };
 
 (function(){
 
-    var cubeGeometry = new THREE.CubeGeometry( constants.Blocksize, constants.Blocksize, constants.Blocksize );
+    var cubeGeometry = blockdata.BlockGeometry = new THREE.CubeGeometry( constants.Blocksize, constants.Blocksize, constants.Blocksize );
 
     var createGeometry = function( id ) {
 

@@ -55,12 +55,18 @@ exports.generateLevel = function() {
                 if ( y === 0 || ( x === 0 && z === 0 ) ) {
                     zArr.push( {
                         //id: Math.floor( Math.random() * 2 ) + 1,
-                        id: 1,
+                        id: 2,
                         position: { x: x, y: y, z: z }
                     } );
-                } else if ( y === 1 && Math.floor( Math.random() * 3 ) === 0 ) {
+                } else if ( y < 3 ) {
                     zArr.push( {
-                        id: 1,
+                        //id: Math.floor( Math.random() * 2 ) + 1,
+                        id: 3,
+                        position: { x: x, y: y, z: z }
+                    } );
+                } else if ( y === 3 && Math.floor( Math.random() * 3 ) === 0 ) {
+                    zArr.push( {
+                        id: 3,
                         position: { x: x, y: y, z: z }
                     } );
                 } else {

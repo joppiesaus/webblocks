@@ -1,7 +1,6 @@
 
 var Level = function() {
 
-    this.blocks = [];
     this.chunks = [];
 
 };
@@ -29,8 +28,6 @@ Level.prototype.importData = function( data ) {
                     block.importData( data.blocks[ x ][ y ][ z ] );
                     block.setup();
 
-                    blocks.push( block );
-
                 } else {
 
                     // if undefined then setup air
@@ -46,7 +43,7 @@ Level.prototype.importData = function( data ) {
 
         }
 
-        this.blocks.push( xArr );
+        blocks.push( xArr );
 
     }
 
@@ -69,7 +66,7 @@ Level.prototype.importData = function( data ) {
                     for ( var y = yc * constants.Chunksize; y < ( yc + 1 ) * constants.Chunksize; y++ ) {
 
                         yArr.push(
-                            this.blocks[ x ][ y ]
+                            blocks[ x ][ y ]
                             .slice( zc * constants.Chunksize, ( zc + 1 ) * constants.Chunksize )
                         );
 

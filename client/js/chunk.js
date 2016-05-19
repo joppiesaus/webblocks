@@ -1,9 +1,9 @@
 // I'm learning so much here!
 
-var Chunk = function( blocks ) {
+var Chunk = function( blocks, position ) {
 
     this.mesh = null;
-    this.blocks = blocks === undefined ? [ ] : blocks;
+    this.blocks = blocks;
 
 };
 
@@ -51,6 +51,8 @@ Chunk.prototype.build = function() {
 
     var geometry = new THREE.Geometry();
 
+    var matrix = new THREE.Matrix4();
+
     for ( var x = 0; x < constants.Chunksize; x++ ) {
         for ( var y = 0; y < constants.Chunksize; y++ ) {
             for ( var z = 0; z < constants.Chunksize; z++ ) {
@@ -63,13 +65,15 @@ Chunk.prototype.build = function() {
                 // TODO: Merge only blocks that are visible
                 // TODO: Merge only faces that are visible
 
-                // TODO: Delete block meshes, replace with matrix offsets
-                block.mesh.updateMatrix();
+                matrix.makeTranslation(
+                    block.position.x,
+                    block.position.y,
+                    block.position.z
+                );
 
-                // Add the block
                 geometry.merge(
-                    block.mesh.geometry,
-                    block.mesh.matrix
+                    blockdata.Meshes[ block.id ].geometry,
+                    matrix
                 );
 
             }

@@ -10,8 +10,6 @@ Block.prototype = {
 
     id: undefined,
     position: new THREE.Vector3(),
-    mesh: undefined,
-    visible: true,
 
     importData: function( data ) {
 
@@ -33,22 +31,21 @@ Block.prototype = {
 
     setup: function() {
 
-        // temporary
+        /*// temporary
 
         if ( !this.id ) {
             // Air
             return;
         }
 
-        this.mesh = blockdata.Meshes[ this.id ].clone();
-        this.mesh.position.copy( this.position );
+        */
 
     },
 
     remove: function() {
 
         this.id = 0;
-        this.removeFromScene();
+        if ( this.mesh ) this.mesh = undefined;
         socket.emit( 'blockRemove', { position: this.position } );
 
     },
@@ -56,18 +53,8 @@ Block.prototype = {
     removeFromServer: function() {
 
         this.id = 0;
-        this.removeFromScene();
+        if ( this.mesh ) this.mesh = undefined;
 
-    },
-
-    removeFromScene: function() {
-
-        if ( this.mesh ) {
-
-            scene.remove( this.mesh );
-            this.mesh = undefined;
-
-        }
     },
 
 }
