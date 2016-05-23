@@ -47,31 +47,31 @@ exports.generateLevel = function() {
 
     var level = { blocks: [ ], size: { x: SIZE, y: SIZE, z: SIZE } };
 
+    // TODO: Remove position information
+    var hSize = SIZE / 2;
     for ( var x = 0; x < SIZE; x++ ) {
         var yArr = [ ];
+        var x2 = x * x;
         for ( var y = 0; y < SIZE; y++ ) {
             var zArr = [ ];
+            var y2 = y * y;
             for ( var z = 0; z < SIZE; z++ ) {
-                if ( y === 0 || ( x === 0 && z === 0 ) ) {
+
+                var mag = Math.round( Math.sqrt( x2 + y2 + z * z ) );
+
+                if ( mag < SIZE ) {
+                    var id = x > hSize ? 2 : 3;
+
                     zArr.push( {
-                        //id: Math.floor( Math.random() * 2 ) + 1,
-                        id: 2,
-                        position: { x: x, y: y, z: z }
-                    } );
-                } else if ( y < 3 ) {
-                    zArr.push( {
-                        //id: Math.floor( Math.random() * 2 ) + 1,
-                        id: 3,
-                        position: { x: x, y: y, z: z }
-                    } );
-                } else if ( y === 3 && Math.floor( Math.random() * 3 ) === 0 ) {
-                    zArr.push( {
-                        id: 3,
+                        //id: Math.floor( Math.random() * 3 ) + 1,
+                        //id: 1,
+                        id: id,
                         position: { x: x, y: y, z: z }
                     } );
                 } else {
                     zArr.push( undefined );
                 }
+
             }
             yArr.push( zArr );
         }
