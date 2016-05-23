@@ -7,11 +7,7 @@ var Player = function( id ) {
 
     this.id = id;
     this.name = 'Player ' + playerCount;
-    this.position = new THREE.Vector3(
-        Math.random() * 2.0,
-        2,
-        Math.random() * 2.0
-    );
+    this.position = exports.level.spawnpoint.clone();
     this.color = Math.random() * 0xffffff;
 
     playerCount++;
@@ -45,7 +41,7 @@ exports.generateLevel = function() {
 
     var SIZE = 64;
 
-    var level = { blocks: [ ], size: { x: SIZE, y: SIZE, z: SIZE } };
+    this.level = { blocks: [ ], size: { x: SIZE, y: SIZE, z: SIZE } };
 
     // TODO: Remove position information
     var hSize = SIZE / 2;
@@ -75,10 +71,10 @@ exports.generateLevel = function() {
             }
             yArr.push( zArr );
         }
-        level.blocks.push( yArr );
+        this.level.blocks.push( yArr );
     }
 
-    return level;
+    this.level.spawnpoint = new THREE.Vector3( SIZE, SIZE, SIZE );
 };
 
 exports.players = players;
