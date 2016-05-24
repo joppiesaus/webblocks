@@ -56,6 +56,7 @@ Chunk.prototype.build = function() {
 
     var scope = this;
 
+    // Returns true if there's a neighbouring block outside of the chunk
     var isExternalBlock = function( pos, v, neg ) {
 
         if ( neg ) {
@@ -94,6 +95,7 @@ Chunk.prototype.build = function() {
 
     };
 
+    // Returns true if there's a neighbouring block
     var isBlock = function( pos, v, val ) {
 
         if ( val < 0 ) {
@@ -161,16 +163,12 @@ Chunk.prototype.build = function() {
                 // Air
                 if ( !block.id ) continue;
 
-                surrounded = true;
                 var pos = new THREE.Vector3( x, y, z );
                 var bGeometry = blockdata.Meshes[ block.id ].geometry.clone();
 
                 if ( adjustGeometry( bGeometry, pos ) ) {
                     continue;
                 }
-
-                // TODO: Merge only blocks that are visible
-                // TODO: Merge only faces that are visible
 
                 matrix.makeTranslation(
                     block.position.x,
@@ -179,7 +177,6 @@ Chunk.prototype.build = function() {
                 );
 
                 geometry.merge(
-                    //blockdata.Meshes[ block.id ].geometry,
                     bGeometry,
                     matrix
                 );
