@@ -1,7 +1,6 @@
 
 var Level = function() {
 
-    this.blocks = [];
     this.chunks = [];
 
 };
@@ -9,6 +8,7 @@ var Level = function() {
 Level.prototype.importData = function( data ) {
 
     this.size = new THREE.Vector3( data.size.x, data.size.y, data.size.z );
+    this.chunkSize = this.size.clone().divideScalar( constants.Chunksize ).floor();
 
     var blocks = [ ];
 
@@ -29,8 +29,6 @@ Level.prototype.importData = function( data ) {
                     block.importData( data.blocks[ x ][ y ][ z ] );
                     block.setup();
 
-                    blocks.push( block );
-
                 } else {
 
                     // if undefined then setup air
@@ -46,19 +44,19 @@ Level.prototype.importData = function( data ) {
 
         }
 
-        this.blocks.push( xArr );
+        blocks.push( xArr );
 
     }
 
-    for ( var xc = 0; xc < this.size.x / constants.Chunksize; xc++ ) {
+    for ( var xc = 0; xc < this.chunkSize.x; xc++ ) {
 
         var xcArr = [ ];
 
-        for ( var yc = 0; yc < this.size.y / constants.Chunksize; yc++ ) {
+        for ( var yc = 0; yc < this.chunkSize.y; yc++ ) {
 
             var ycArr = [ ];
 
-            for ( var zc = 0; zc < this.size.z / constants.Chunksize; zc++ ) {
+            for ( var zc = 0; zc < this.chunkSize.z; zc++ ) {
 
                 var cblocks = [ ];
 
@@ -69,7 +67,7 @@ Level.prototype.importData = function( data ) {
                     for ( var y = yc * constants.Chunksize; y < ( yc + 1 ) * constants.Chunksize; y++ ) {
 
                         yArr.push(
-                            this.blocks[ x ][ y ]
+                            blocks[ x ][ y ]
                             .slice( zc * constants.Chunksize, ( zc + 1 ) * constants.Chunksize )
                         );
 
@@ -79,7 +77,7 @@ Level.prototype.importData = function( data ) {
 
                 }
 
-                ycArr.push( new Chunk( cblocks ) );
+                ycArr.push( new Chunk( cblocks, new THREE.Vector3( xc, yc, zc ) ) );
 
             }
 
