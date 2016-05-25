@@ -29,32 +29,10 @@ Block.prototype = {
 
     },
 
-    setup: function() {
-
-        /*// temporary
-
-        if ( !this.id ) {
-            // Air
-            return;
-        }
-
-        */
-
-    },
-
     remove: function() {
 
         this.id = 0;
-        if ( this.mesh ) this.mesh = undefined;
-        socket.emit( 'blockRemove', { position: this.position } );
 
     },
-
-    removeFromServer: function() {
-
-        this.id = 0;
-        if ( this.mesh ) this.mesh = undefined;
-
-    },
-
+    
 }

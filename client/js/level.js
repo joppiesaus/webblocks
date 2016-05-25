@@ -27,7 +27,6 @@ Level.prototype.importData = function( data ) {
                 if ( data.blocks[ x ][ y ][ z ] ) {
 
                     block.importData( data.blocks[ x ][ y ][ z ] );
-                    block.setup();
 
                 } else {
 
@@ -110,57 +109,8 @@ Level.prototype.isOutOfBounds = function( position ) {
 
 Level.prototype.addBlock = function( block ) {
 
-    var chunk = this.chunks
-        [ Math.floor( block.position.x / constants.Chunksize ) ]
-        [ Math.floor( block.position.y / constants.Chunksize ) ]
-        [ Math.floor( block.position.z / constants.Chunksize ) ];
-
-    block.setup();
-
-    chunk.blocks
-        [ block.position.x % constants.Chunksize ]
-        [ block.position.y % constants.Chunksize ]
-        [ block.position.z % constants.Chunksize ]
-        = block;
-
-    chunk.build();
-
+    this.addBlockCore( block );
     socket.emit( 'blockAdd', block.exportData() );
-
-};
-
-Level.prototype.removeBlockAtPosition = function( position ) {
-
-    // TODO: Add chunk property to block for easy removing/adding?
-    var chunk = this.chunks
-        [ Math.floor( position.x / constants.Chunksize ) ]
-        [ Math.floor( position.y / constants.Chunksize ) ]
-        [ Math.floor( position.z / constants.Chunksize ) ];
-
-    chunk.blocks
-        [ position.x % constants.Chunksize ]
-        [ position.y % constants.Chunksize ]
-        [ position.z % constants.Chunksize ]
-        .remove();
-
-    chunk.build();
-
-};
-
-Level.prototype.removeBlockFromServer = function( data ) {
-
-    var chunk = this.chunks
-        [ Math.floor( data.position.x / constants.Chunksize ) ]
-        [ Math.floor( data.position.y / constants.Chunksize ) ]
-        [ Math.floor( data.position.z / constants.Chunksize ) ];
-
-    chunk.blocks
-        [ data.position.x % constants.Chunksize ]
-        [ data.position.y % constants.Chunksize ]
-        [ data.position.z % constants.Chunksize ]
-        .removeFromServer();
-
-    chunk.build();
 
 };
 
@@ -168,20 +118,124 @@ Level.prototype.addBlockFromServer = function( data ) {
 
     var block = new Block();
     block.importData( data );
-    block.setup();
+
+    this.addBlockCore( block );
+
+};
+
+Level.prototype.addBlockCore = function( block ) {
+
+    var chunkPosition = block.position.clone().divideScalar( constants.Chunksize ).floor();
+    var innerPosition = new THREE.Vector3(
+            block.position.x % constants.Chunksize,
+            block.position.y % constants.Chunksize,
+            block.position.z % constants.Chunksize
+    );
 
     var chunk = this.chunks
-        [ Math.floor( block.position.x / constants.Chunksize ) ]
-        [ Math.floor( block.position.y / constants.Chunksize ) ]
-        [ Math.floor( block.position.z / constants.Chunksize ) ];
+        [ chunkPosition.x ]
+        [ chunkPosition.y ]
+        [ chunkPosition.z ];
 
     chunk.blocks
-        [ block.position.x % constants.Chunksize ]
-        [ block.position.y % constants.Chunksize ]
-        [ block.position.z % constants.Chunksize ]
+        [ innerPosition.x ]
+        [ innerPosition.y ]
+        [ innerPosition.z ]
         = block;
 
     chunk.build();
+    this.checkBoundingChunks( chunkPosition, innerPosition );
+
+};
+
+// Checks for bounding chunks that need to be updated in case of a block/mesh change aligning it
+Level.prototype.checkBoundingChunks = function( chunkPosition, innerPosition ) {
+
+    if ( innerPosition.x === 0 && chunkPosition.x > 0 ) {
+        this.chunks
+            [ chunkPosition.x - 1 ]
+            [ chunkPosition.y ]
+            [ chunkPosition.z ]
+            .build();
+    } else if ( innerPosition.x === constants.Chunksize - 1 && chunkPosition.x < this.chunkSize.x - 1 ) {
+        this.chunks
+            [ chunkPosition.x + 1 ]
+            [ chunkPosition.y ]
+            [ chunkPosition.z ]
+            .build();
+    }
+
+    if ( innerPosition.y === 0 && chunkPosition.y > 0 ) {
+        this.chunks
+            [ chunkPosition.x ]
+            [ chunkPosition.y - 1 ]
+            [ chunkPosition.z ]
+            .build();
+    } else if ( innerPosition.y === constants.Chunksize - 1 && chunkPosition.y < this.chunkSize.y - 1 ) {
+        this.chunks
+            [ chunkPosition.x ]
+            [ chunkPosition.y + 1]
+            [ chunkPosition.z ]
+            .build();
+    }
+
+    if ( innerPosition.z === 0 && chunkPosition.z > 0 ) {
+        this.chunks
+            [ chunkPosition.x ]
+            [ chunkPosition.y ]
+            [ chunkPosition.z - 1]
+            .build();
+    } else if ( innerPosition.z === constants.Chunksize - 1 && chunkPosition.z < this.chunkSize.z - 1 ) {
+        this.chunks
+            [ chunkPosition.x ]
+            [ chunkPosition.y ]
+            [ chunkPosition.z + 1 ]
+            .build();
+    }
+
+};
+
+Level.prototype.removeBlockAtPosition = function( position ) {
+
+    this.removeBlockAtPositionCore( position );
+
+    socket.emit( 'blockRemove', { position: position } );
+
+};
+
+Level.prototype.removeBlockAtPositionCore = function( position ) {
+
+    var chunkPosition = position.clone().divideScalar( constants.Chunksize ).floor();
+    var innerPosition = new THREE.Vector3(
+            position.x % constants.Chunksize,
+            position.y % constants.Chunksize,
+            position.z % constants.Chunksize
+    );
+
+    var chunk = this.chunks
+        [ chunkPosition.x ]
+        [ chunkPosition.y ]
+        [ chunkPosition.z ];
+
+    var block = chunk.blocks
+        [ innerPosition.x ]
+        [ innerPosition.y ]
+        [ innerPosition.z ];
+
+    block.remove();
+
+    chunk.build();
+    this.checkBoundingChunks( chunkPosition, innerPosition );
+
+};
+
+Level.prototype.removeBlockFromServer = function( data ) {
+
+    this.removeBlockAtPositionCore( new THREE.Vector3(
+        data.position.x,
+        data.position.y,
+        data.position.z
+    ) );
 
 };
 
