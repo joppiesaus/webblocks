@@ -2,11 +2,11 @@ var express = require( 'express' );
 var app = express();
 var http = require( 'http' ).Server( app );
 var io = require( 'socket.io' )( http );
-var world = require( './server/server' );
+var world = require( './server/world' );
 
 app.use (express.static( 'client' ) );
 
-var level = world.generateLevel();
+world.generateLevel();
 
 io.on( 'connection', function( socket ) {
 
@@ -39,23 +39,24 @@ io.on( 'connection', function( socket ) {
     });
 
     socket.on( 'blockAdd', function( data ) {
-        level.blocks[ data.position.x ][ data.position.y ][ data.position.z ] = data;
+        world.level.blocks[ data.position.x ][ data.position.y ][ data.position.z ] = data;
         socket.broadcast.emit( 'blockAdd', data );
     });
 
     socket.on( 'blockRemove', function( data ) {
-        level.blocks[ data.position.x ][ data.position.y ][ data.position.z ] = undefined;
+        world.level.blocks[ data.position.x ][ data.position.y ][ data.position.z ] = undefined;
         socket.broadcast.emit( 'blockRemove', data );
     });
 
     socket.on( 'requestLevel', function() {
-        socket.emit( 'level', level );
+        socket.emit( 'level', world.level );
     });
 
     socket.on( 'updateVariable', function( data ) {
         world.updatePlayerVariable( data.id, data.variable, data.val );
         socket.broadcast.emit( 'updateVariable', data );
     });
+
 
     socket.on( 'updatePlayerPosition', function( data ) {
         world.updatePlayerVariable( data.id, 'position', data.val );
