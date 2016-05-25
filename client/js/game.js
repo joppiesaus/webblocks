@@ -110,6 +110,7 @@ Game.prototype.init = function() {
 
 Game.prototype.mouseDown = function( evnt ) {
 
+    if ( !controls.enabled ) return;
     switch ( evnt.which ) {
 
         case InputManager.LEFT_MOUSE_BUTTON:
