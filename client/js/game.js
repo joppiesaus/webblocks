@@ -94,18 +94,12 @@ Game.prototype.init = function() {
     var light = new THREE.AmbientLight( /*0x404040*/ 0xffffff );
     scene.add( light );
 
-    // torus knot as orientation point
-    /*var oGeometry = new THREE.TorusKnotGeometry( 10, 3, 64, 8 );
-    var oMaterial = new THREE.MeshNormalMaterial();
-    var orientationPoint = new THREE.Mesh( oGeometry, oMaterial );
-    orientationPoint.position.set( 0, 0, 0 );
-    scene.add( orientationPoint );*/
-
     window.addEventListener( 'mouseup', this.mouseUp, false );
     window.addEventListener( 'mousedown', this.mouseDown, false );
 
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
+
 };
 
 Game.prototype.mouseDown = function( evnt ) {
@@ -121,6 +115,10 @@ Game.prototype.mouseDown = function( evnt ) {
         case InputManager.RIGHT_MOUSE_BUTTON:
             game.rightMouseDown = true;
             game.removeBlockAtCrosshair();
+            break;
+
+        case InputManager.MIDDLE_MOUSE_BUTTON:
+            game.pickBlockAtCrosshair();
             break;
 
         default:
@@ -164,6 +162,48 @@ Game.prototype.getChunkMeshArray = function() {
 };
 
 
+Game.prototype.getBlockPositionAtCrosshair = function() {
+
+    var raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
+
+    var intersects = raycaster.intersectObjects( this.getChunkMeshArray(), false );
+
+    if ( intersects.length > 0 ) {
+
+        var intersect = intersects[ 0 ];
+
+        var position = intersect.point.clone();
+
+        var positionBackup = position.clone();
+
+        position.round();
+
+        var normal = intersect.face.normal;
+        var v = 'x';
+        if ( normal.y ) v = 'y';
+        else if ( normal.z ) v = 'z';
+
+        position[ v ] = Math.floor( positionBackup[ v ] );
+        if ( normal[ v ] < 0 ) position[ v ] += 1;
+
+        return position;
+    }
+
+    return undefined;
+
+};
+
+Game.prototype.pickBlockAtCrosshair = function() {
+
+    var pos = this.getBlockPositionAtCrosshair();
+
+    if ( !pos ) return;
+
+    this.player.userData.selectedBlock = this.world.level.getBlock( pos ).id;
+
+};
+
 Game.prototype.addBlockAtCrosshair = function() {
 
     var raycaster = new THREE.Raycaster();
@@ -202,32 +242,12 @@ Game.prototype.addBlockAtCrosshair = function() {
 
 Game.prototype.removeBlockAtCrosshair = function() {
 
-    var raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera( new THREE.Vector2( 0, 0 ), camera );
+    var pos = this.getBlockPositionAtCrosshair();
 
-    var intersects = raycaster.intersectObjects( this.getChunkMeshArray(), false );
+    if ( !pos ) return;
 
-    if ( intersects.length > 0 ) {
+    this.world.level.removeBlockAtPosition( pos );
 
-        var intersect = intersects[ 0 ];
-
-        var position = intersect.point.clone();
-
-        var positionBackup = position.clone();
-
-        position.round();
-
-        var normal = intersect.face.normal;
-        var v = 'x';
-        if ( normal.y ) v = 'y';
-        else if ( normal.z ) v = 'z';
-
-        position[ v ] = Math.floor( positionBackup[ v ] );
-        if ( normal[ v ] < 0 ) position[ v ] += 1;
-
-        this.world.level.removeBlockAtPosition( position );
-
-    }
 };
 
 Game.prototype.update = function( delta ) {

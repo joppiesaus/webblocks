@@ -1,6 +1,7 @@
 var InputManager =
 {
     LEFT_MOUSE_BUTTON: 1,
+    MIDDLE_MOUSE_BUTTON: 2,
     RIGHT_MOUSE_BUTTON: 3,
 
     keys: [],

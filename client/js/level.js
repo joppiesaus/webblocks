@@ -241,16 +241,17 @@ Level.prototype.removeBlockFromServer = function( data ) {
 
 Level.prototype.getBlock = function( position ) {
 
-    return
-        this.chunks
-        [ Math.floor( position.x / constants.Chunksize ) ]
-        [ Math.floor( position.y / constants.Chunksize ) ]
-        [ Math.floor( position.z / constants.Chunksize ) ]
-        .blocks
+    var chunkPosition = position.clone().divideScalar( constants.Chunksize ).floor();
+
+    var chunk = this.chunks
+        [ chunkPosition.x ]
+        [ chunkPosition.y ]
+        [ chunkPosition.z ];
+
+    return chunk.blocks
         [ position.x % constants.Chunksize ]
         [ position.y % constants.Chunksize ]
-        [ position.z % constants.Chunksize ]
-    ;
+        [ position.z % constants.Chunksize ];
 
 };
 
