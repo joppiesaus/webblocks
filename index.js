@@ -3,8 +3,10 @@ var app = express();
 var http = require( 'http' ).Server( app );
 var io = require( 'socket.io' )( http );
 var world = require( './server/world' );
+var fs = require( 'fs' );
+var zlib = require( 'zlib' );
 
-app.use (express.static( 'client' ) );
+app.use( express.static( 'client' ) );
 
 world.generateLevel();
 
@@ -34,8 +36,66 @@ io.on( 'connection', function( socket ) {
         socket.broadcast.emit( 'message', message );
     });
 
+    var tellPlayer = function( message ) {
+        console.log( message );
+        socket.emit( 'message', message );
+    };
+
     socket.on( 'command', function( data ) {
-        socket.emit( 'message', 'No!' );
+
+        var command = data.toLowerCase();
+
+        switch ( command ) {
+
+            case 'saveworld':
+
+                tellPlayer( 'Saving world...' );
+
+                fs.writeFile( 'level.json', JSON.stringify( world.minifiedLevel() ), function( err ) {
+
+                    if ( err ) {
+                        tellPlayer( 'Error while saving world: ' + err );
+                        return;
+                    }
+
+                    tellPlayer( 'Saved world succesfully!' );
+
+                } );
+
+                break;
+
+            case 'loadworld':
+
+                tellPlayer( 'Loading world...' );
+
+                fs.readFile( 'level.json', 'utf8', function( err, data ) {
+
+                    if ( err ) {
+                        tellPlayer( 'Error while loading world: ' + err );
+                        return;
+                    }
+
+                    var d = JSON.parse( data );
+
+                    world.loadMinifiedLevel( d );
+
+                    socket.emit( 'level', d );
+                    socket.broadcast.emit( 'level', d );
+
+                    tellPlayer( 'Loaded world succesfully!' );
+
+                } );
+
+                break;
+
+            default:
+
+                socket.emit( 'message', 'No! I don\'t want to ' + command + '!' );
+
+                break;
+
+        }
+
     });
 
     socket.on( 'blockAdd', function( data ) {
@@ -49,18 +109,12 @@ io.on( 'connection', function( socket ) {
     });
 
     socket.on( 'requestLevel', function() {
-        socket.emit( 'level', world.level );
+        socket.emit( 'level', world.minifiedLevel() );
     });
 
     socket.on( 'updateVariable', function( data ) {
         world.updatePlayerVariable( data.id, data.variable, data.val );
         socket.broadcast.emit( 'updateVariable', data );
-    });
-
-
-    socket.on( 'updatePlayerPosition', function( data ) {
-        world.updatePlayerVariable( data.id, 'position', data.val );
-        socket.broadcast.emit( 'updatePlayerPosition', data );
     });
 
     socket.on( 'updatePlayerVector3', function( data ) {

@@ -25,6 +25,7 @@ Game.prototype.createOtherPlayer = function( p ) {
 
 };
 
+// TODO: Move to seperate class, create methods like respawn, move, etc
 Game.prototype.createPlayer = function( p ) {
 
     // TODO: player is also inside player list
@@ -53,12 +54,6 @@ Game.prototype.updatePlayer = function( p ) {
 
 };
 
-Game.prototype.updatePlayerPosition = function( data ) {
-
-    this.world.players[ data.id ].position.set( data.val.x, data.val.y, data.val.z );
-
-};
-
 Game.prototype.updatePlayerVector3 = function( data ) {
 
     this.world.players[ data.id ][ data.variable ].set( data.val.x, data.val.y, data.val.z );
@@ -83,12 +78,6 @@ Game.prototype.sendPlayerUpdateVector3 = function( variable ) {
 
 };
 
-Game.prototype.sendPlayerUpdatePosition = function() {
-
-    socket.emit( 'updatePlayerPosition', { id: this.player.userData.id, val: this.player.position } );
-
-};
-
 Game.prototype.init = function() {
 
     var light = new THREE.AmbientLight( /*0x404040*/ 0xffffff );
@@ -99,6 +88,13 @@ Game.prototype.init = function() {
 
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
+
+};
+
+Game.prototype.importLevel = function( data ) {
+
+    // TODO: Player respawning
+    this.world.level.importData( data );
 
 };
 

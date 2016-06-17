@@ -37,6 +37,81 @@ exports.removePlayer = function( player ) {
     delete players[ player.id ];
 };
 
+exports.minifiedLevel = function() {
+
+    var level = { blocks: [ ], size: this.level.size, spawnpoint: this.level.spawnpoint };
+
+    for ( var x = 0; x < this.level.size.x; x++ ) {
+
+        for ( var y = 0; y < this.level.size.y; y++ ) {
+
+            for ( var z = 0; z < this.level.size.z; z++ ) {
+
+                level.blocks.push(
+                    !this.level.blocks[ x ][ y ][ z ] ? 0 : this.level.blocks[ x ][ y ][ z ].id
+                );
+
+            }
+
+        }
+
+    }
+
+    return level;
+
+};
+
+exports.loadMinifiedLevel = function( data ) {
+
+    this.level = {
+        blocks: [ ],
+        size: data.size,
+        spawnpoint: new THREE.Vector3(
+            data.spawnpoint.x,
+            data.spawnpoint.y,
+            data.spawnpoint.z
+        ),
+    };
+
+    var i = 0;
+
+    for ( var x = 0; x < this.level.size.x; x++ ) {
+
+        var yArr = [ ];
+
+        for ( var y = 0; y < this.level.size.y; y++ ) {
+
+            var zArr = [ ];
+
+            for ( var z = 0; z < this.level.size.z; z++ ) {
+
+                var id = data.blocks[ i++ ];
+
+                if ( !id ) {
+
+                    zArr.push( undefined );
+
+                } else {
+
+                    zArr.push( {
+                        id: id,
+                        position: { x: x, y: y, z: z }
+                    } )
+
+                }
+
+            }
+
+            yArr.push( zArr );
+
+        }
+
+        this.level.blocks.push( yArr );
+
+    }
+
+};
+
 exports.generateLevel = function() {
 
     var SIZE = 64;

@@ -7,33 +7,30 @@ var Level = function() {
 
 Level.prototype.importData = function( data ) {
 
+    // If the level already exists, destroy it
+    if ( this.chunks.length ) {
+        this.destroy();
+    }
+
     this.size = new THREE.Vector3( data.size.x, data.size.y, data.size.z );
     this.chunkSize = this.size.clone().divideScalar( constants.Chunksize ).floor();
 
     var blocks = [ ];
+    var i = 0;
 
-    for ( var x = 0; x < data.blocks.length; x++ ) {
+    for ( var x = 0; x < this.size.x; x++ ) {
 
         var xArr = [ ];
 
-        for ( var y = 0; y < data.blocks[ x ].length; y++ ) {
+        for ( var y = 0; y < this.size.y; y++ ) {
 
             var yArr = [ ];
 
-            for ( var z = 0; z < data.blocks[ x ][ y ].length; z++ ) {
+            for ( var z = 0; z < this.size.z; z++ ) {
 
                 var block = new Block();
 
-                if ( data.blocks[ x ][ y ][ z ] ) {
-
-                    block.importData( data.blocks[ x ][ y ][ z ] );
-
-                } else {
-
-                    // if undefined then setup air
-                    block.importData( { id: 0, position: { x: x, y: y, z: z } } );
-
-                }
+                block.importData( { id: data.blocks[ i++ ], position: { x: x, y: y, z: z } } );
 
                 yArr.push( block );
 
@@ -95,6 +92,17 @@ Level.prototype.importData = function( data ) {
 };
 
 Level.prototype.exportData = function() {
+
+};
+
+Level.prototype.destroy = function() {
+
+    this.forEachChunk( chunk => {
+        chunk.destroy();
+    } );
+
+    // Empty chunk array
+    this.chunks.splice( 0, this.chunks.length );
 
 };
 

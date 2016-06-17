@@ -4,14 +4,14 @@ socket.on( 'connect', function( data ) {
     console.info( 'connected' );
 
     // Remove "Connecting..." message
-    document.getElementById( 'msg' ).textContent = "Click to play";
+    document.getElementById( 'msg' ).textContent = 'Click to play';
 
     socket.emit( 'requestOldPlayers', {} );
     socket.emit( 'requestLevel', {} );
 });
 
 socket.on( 'disconnect', function( data ) {
-    document.getElementById( 'msg' ).textContent = "Reconnecting...";
+    document.getElementById( 'msg' ).textContent = 'Reconnecting...';
 });
 
 socket.on( 'message', function( data ) {
@@ -19,7 +19,7 @@ socket.on( 'message', function( data ) {
 });
 
 socket.on( 'level', function( data ) {
-    game.world.level.importData( data );
+    game.importLevel( data );
 });
 
 socket.on( 'blockAdd', function( data ) {
@@ -36,10 +36,6 @@ socket.on( 'updateVariable', function( data ) {
 
 socket.on( 'updatePlayerVector3', function( data ) {
     game.updatePlayerVector3( data );
-});
-
-socket.on( 'updatePlayerPosition', function( data ) {
-    game.updatePlayerPosition( data );
 });
 
 socket.on( 'createPlayer', function( data ) {

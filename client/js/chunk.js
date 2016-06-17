@@ -16,6 +16,16 @@ Chunk.prototype.exportData = function() {
 
 };
 
+Chunk.prototype.destroy = function() {
+
+    if ( this.mesh ) {
+        scene.remove( this.mesh );
+    }
+
+    this.blocks = [ ];
+
+};
+
 // Gives all the blocks in this chunk a .chunk property, pointing to this chunk
 Chunk.prototype.markBlocks = function() {
 
