@@ -54,6 +54,13 @@ Game.prototype.updatePlayer = function( p ) {
 
 };
 
+Game.prototype.teleportToPlayer = function( id ) {
+
+    this.player.position.copy( this.world.players[ id ].position );
+    this.sendPlayerUpdateVector3( 'position' );
+
+};
+
 Game.prototype.updatePlayerVector3 = function( data ) {
 
     this.world.players[ data.id ][ data.variable ].set( data.val.x, data.val.y, data.val.z );
@@ -256,6 +263,14 @@ Game.prototype.update = function( delta ) {
     var cObject = controls.getObject();
     var prev = this.player.position.clone();
 
+    if ( this.player.userData.prevPosition !== this.player.position.x ||
+         this.player.userData.prevPosition !== this.player.position.y ||
+         this.player.userData.prevPosition !== this.player.position.z ) {
+        // Assumes the server is aware of this position
+        //this.sendPlayerUpdateVector3( 'position' );
+        cObject.position.copy( this.player.position );
+    }
+
     this.player.userData.velocity.x -= this.player.userData.velocity.x * 10.0 * delta;
     this.player.userData.velocity.y -= this.player.userData.velocity.y * 10.0 * delta;
     this.player.userData.velocity.z -= this.player.userData.velocity.z * 10.0 * delta;
@@ -298,9 +313,10 @@ Game.prototype.update = function( delta ) {
     if ( prev.x !== this.player.position.x ||
          prev.y !== this.player.position.y ||
          prev.z !== this.player.position.z ) {
-        //this.sendPlayerUpdatePosition();
         this.sendPlayerUpdateVector3( 'position' );
     }
+
+    this.player.userData.prevPosition = this.player.position.clone();
 
 };
 
