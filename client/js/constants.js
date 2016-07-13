@@ -13,6 +13,8 @@ var blockdata = {
     ChunkMaterial: null,
     BlockGeometry: null,
 
+    HalfBlocksize: constants.Blocksize / 2.0,
+
 };
 
 (function(){

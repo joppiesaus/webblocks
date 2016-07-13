@@ -37,6 +37,7 @@ Game.prototype.createPlayer = function( p ) {
     controls.getObject().position.copy( this.player.position );
     this.player.userData.velocity = new THREE.Vector3( 0, 0, 0 );
     this.player.userData.selectedBlock = 2;
+    this.player.userData.collide = true;
 
 };
 
@@ -58,6 +59,12 @@ Game.prototype.teleportToPlayer = function( id ) {
 
     this.player.position.copy( this.world.players[ id ].position );
     this.sendPlayerUpdateVector3( 'position' );
+
+};
+
+Game.prototype.doPlayerCollisions = function() {
+
+
 
 };
 
@@ -234,6 +241,19 @@ Game.prototype.addBlockAtCrosshair = function() {
 
         // Block out of bounds
         if ( position[ v ] < 0 || position[ v ] >= this.world.level.size[ v ] ) return;
+
+        // Check if the block collides with the player
+        if ( this.player.userData.collide /* insert block collision check here */ ) {
+
+            var pbb = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() );
+            pbb.setFromObject( this.player );
+
+            var bbb = collisions.blockBoxFromPosition( position );
+
+            // If it does, do not place the block
+            if ( pbb.intersectsBox( bbb ) ) return;
+
+        }
 
         var block = new Block( this.player.userData.selectedBlock );
         block.position = position;
