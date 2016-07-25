@@ -82,6 +82,7 @@ var collisions = {
         var exitTime = Math.min( exit.x, exit.y, exit.z );
 
         // No collision
+        // Sumeting wong here
         if ( entryTime > exitTime || entryTime > 1 ) {
 
             return {
@@ -141,9 +142,94 @@ var collisions = {
 
     },
 
+    createBroadBox: function( a, v ) {
+
+        return new THREE.Box3(
+            new THREE.Vector3(
+                v.x > 0 ? a.min.x : a.min.x + v.x,
+                v.y > 0 ? a.min.y : a.min.y + v.y,
+                v.z > 0 ? a.min.z : a.min.z + v.z
+            ),
+            new THREE.Vector3(
+                v.x > 0 ? a.max.x + v.x : a.max.x - v.x,
+                v.y > 0 ? a.max.y + v.y : a.max.y - v.y,
+                v.z > 0 ? a.max.z + v.z : a.max.z - v.z
+            )
+        );
+
+    },
+
     collideWithBlocks: function( a, velocity ) {
 
-        // TODO
+        var toGrid = function( pos ) {
+            return pos.floor();
+        };
+
+        var distance = velocity.length();
+        var loops = Math.ceil( distance );
+        var broadBox = this.createBroadBox( a, velocity );
+        var face, vel, box;
+
+        for ( var i = 1; i <= loops; i++ ) {
+
+            vel = velocity.clone().divideScalar( loops ).multiplyScalar( i );
+            box = a.clone().translate( vel );
+
+            var t = [ ];
+            if ( vel.y !== 0.0 ) {
+                face = vel.y < 0.0 ? box.min.y : box.max.y;
+                t.push( ( new THREE.Vector3( box.max.x, face, box.max.z ) ).floor() );
+                t.push( ( new THREE.Vector3( box.max.x, face, box.min.z ) ).floor() );
+                t.push( ( new THREE.Vector3( box.min.x, face, box.max.z ) ).floor() );
+                t.push( ( new THREE.Vector3( box.min.x, face, box.min.z ) ).floor() );
+            }
+            if ( vel.x !== 0.0 ) {
+                face = vel.x < 0.0 ? box.min.x : box.max.x;
+                t.push( ( new THREE.Vector3( face, box.max.y, box.max.z ) ).floor() );
+                t.push( ( new THREE.Vector3( face, box.max.y, box.min.z ) ).floor() );
+                t.push( ( new THREE.Vector3( face, box.min.y, box.max.z ) ).floor() );
+                t.push( ( new THREE.Vector3( face, box.min.y, box.min.z ) ).floor() );
+            }
+            if ( vel.z !== 0.0 ) {
+                face = vel.z < 0.0 ? box.min.z : box.max.z;
+                t.push( ( new THREE.Vector3( box.max.x, box.max.y, face ) ).floor() );
+                t.push( ( new THREE.Vector3( box.min.x, box.max.y, face ) ).floor() );
+                t.push( ( new THREE.Vector3( box.max.x, box.min.y, face ) ).floor() );
+                t.push( ( new THREE.Vector3( box.min.x, box.min.y, face ) ).floor() );
+            }
+
+            // TODO: Remove duplicates
+            var corners = t;
+
+            // Check teh cornerz
+            for ( var j = 0; j < corners.length; j++ ) {
+
+                var block = game.world.level.getBlockUncheckedBounds( corners[ j ] );
+
+                if ( !block || !block.id ) continue;
+
+                // TODO: Check if block is collidable, etc
+
+                var blockCol = this.blockBoxFromPosition( corners[ j ] );
+
+                if ( broadBox.intersectsBox( blockCol ) ) {
+                    return this.sweptAABB( a, blockCol, velocity );
+                }
+
+            }
+
+        }
+
+        // No collision found!
+        return {
+            time: 1,
+            normal: new THREE.Vector3(),
+            exitTime: Infinity,
+            invEntry: new THREE.Vector3(),
+            invExit: new THREE.Vector3(),
+            entry: new THREE.Vector3( 1, 1, 1 ),
+            exit: new THREE.Vector3( Infinity, Infinity, Infinity )
+        };
 
     },
 

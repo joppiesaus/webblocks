@@ -263,6 +263,15 @@ Level.prototype.getBlock = function( position ) {
 
 };
 
+Level.prototype.getBlockUncheckedBounds = function( position ) {
+
+    if ( this.isOutOfBounds( position ) ) {
+        return undefined;
+    }
+    return this.getBlock( position );
+
+};
+
 Level.prototype.forEachChunk = function( func ) {
 
     for ( var x = 0; x < this.chunks.length; x++ ) {

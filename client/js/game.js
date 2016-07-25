@@ -38,6 +38,8 @@ Game.prototype.createPlayer = function( p ) {
     this.player.userData.velocity = new THREE.Vector3( 0, 0, 0 );
     this.player.userData.selectedBlock = 2;
     this.player.userData.collide = true;
+    this.player.userData.boundingBox = new THREE.Box3();
+    this.player.userData.boundingBox.setFromObject( this.player );
 
 };
 
@@ -324,11 +326,30 @@ Game.prototype.update = function( delta ) {
         this.player.userData.selectedBlock = 3;
     }
 
-    cObject.translateX( this.player.userData.velocity.x * delta );
-    cObject.translateY( this.player.userData.velocity.y * delta );
-    cObject.translateZ( this.player.userData.velocity.z * delta );
+    var vel = this.player.userData.velocity.clone().multiplyScalar( delta );
 
-    this.player.position.copy( cObject.position );
+    if ( vel.length() > 0.0 ) {
+
+        // Do player collision
+        if ( this.player.userData.collide ) {
+            this.player.userData.boundingBox.setFromObject( this.player );
+
+            var collision = collisions.collideWithBlocks( this.player.userData.boundingBox, vel );
+
+            // Collision detected
+            if ( collision.entryTime < 1.0 ) {
+                console.log( collision );
+                vel.multiplyScalar( collision.entryTime );
+            }
+        }
+
+        cObject.translateX( vel.x );
+        cObject.translateY( vel.y );
+        cObject.translateZ( vel.z );
+
+        this.player.position.copy( cObject.position );
+
+    }
 
     if ( prev.x !== this.player.position.x ||
          prev.y !== this.player.position.y ||
