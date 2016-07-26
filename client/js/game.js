@@ -247,6 +247,7 @@ Game.prototype.addBlockAtCrosshair = function() {
         // Check if the block collides with the player
         if ( this.player.userData.collide /* insert block collision check here */ ) {
 
+            // update this
             var pbb = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() );
             pbb.setFromObject( this.player );
 
@@ -291,6 +292,7 @@ Game.prototype.update = function( delta ) {
         // Assumes the server is aware of this position
         //this.sendPlayerUpdateVector3( 'position' );
         cObject.position.copy( this.player.position );
+        prev.copy( this.player.position );
     }
 
     this.player.userData.velocity.x -= this.player.userData.velocity.x * 10.0 * delta;
@@ -330,6 +332,16 @@ Game.prototype.update = function( delta ) {
 
     if ( vel.length() > 0.0 ) {
 
+        var beforeTranslation = cObject.position.clone();
+
+        cObject.translateX( vel.x );
+        cObject.translateY( vel.y );
+        cObject.translateZ( vel.z );
+
+        vel.copy( cObject.position ).sub( beforeTranslation );
+
+        cObject.position.copy( beforeTranslation );
+
         // Do player collision
         if ( this.player.userData.collide ) {
             this.player.userData.boundingBox.setFromObject( this.player );
@@ -343,9 +355,7 @@ Game.prototype.update = function( delta ) {
             }
         }
 
-        cObject.translateX( vel.x );
-        cObject.translateY( vel.y );
-        cObject.translateZ( vel.z );
+        cObject.position.add( vel );
 
         this.player.position.copy( cObject.position );
 

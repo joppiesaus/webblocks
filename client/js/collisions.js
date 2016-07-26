@@ -40,7 +40,7 @@ var collisions = {
             invEntry.y = b.min.y - a.max.y;
             invExit.y = b.max.y - a.min.y;
         } else {
-            invEntry.y = b.max.y - a.min.y.y;
+            invEntry.y = b.max.y - a.min.y;
             invExit.y = b.min.y - a.max.y;
         }
         if ( aVel.z > 0.0 ) {
@@ -83,7 +83,7 @@ var collisions = {
 
         // No collision
         // Sumeting wong here
-        if ( entryTime > exitTime || entryTime > 1 ) {
+        if ( entryTime > exitTime || ( entry.x < 0.0 && entry.y < 0.0 && entry.z < 0.0) || entryTime > 1 ) {
 
             return {
                 entryTime: 1,
