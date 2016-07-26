@@ -38,6 +38,8 @@ Game.prototype.createPlayer = function( p ) {
     this.player.userData.velocity = new THREE.Vector3( 0, 0, 0 );
     this.player.userData.selectedBlock = 2;
     this.player.userData.collide = true;
+    this.player.userData.flying = false;
+    this.player.userData.onGround = false;
     this.player.userData.boundingBox = new THREE.Box3();
     this.player.userData.boundingBox.setFromObject( this.player );
 
@@ -282,6 +284,16 @@ Game.prototype.update = function( delta ) {
         return;
     }
 
+    if ( InputManager.isKeyPressed( 49 /*1*/ ) ) {
+        this.player.userData.selectedBlock = 1;
+    }
+    if ( InputManager.isKeyPressed( 50 /*2*/ ) ) {
+        this.player.userData.selectedBlock = 2;
+    }
+    if ( InputManager.isKeyPressed( 51 /*3*/ ) ) {
+        this.player.userData.selectedBlock = 3;
+    }
+
     var playerspeed = 1 * delta * 250.0;
     var cObject = controls.getObject();
     var prev = this.player.position.clone();
@@ -295,37 +307,69 @@ Game.prototype.update = function( delta ) {
         prev.copy( this.player.position );
     }
 
-    this.player.userData.velocity.x -= this.player.userData.velocity.x * 10.0 * delta;
-    this.player.userData.velocity.y -= this.player.userData.velocity.y * 10.0 * delta;
-    this.player.userData.velocity.z -= this.player.userData.velocity.z * 10.0 * delta;
+    if ( this.player.userData.flying )
+    {
+        this.player.userData.velocity.x -= this.player.userData.velocity.x * 10.0 * delta;
+        this.player.userData.velocity.y -= this.player.userData.velocity.y * 10.0 * delta;
+        this.player.userData.velocity.z -= this.player.userData.velocity.z * 10.0 * delta;
 
-    if ( InputManager.isKeyDown( 87 /*w*/ ) ) {
-        this.player.userData.velocity.z -= playerspeed;
+        if ( InputManager.isKeyDown( 87 /*w*/ ) ) {
+            this.player.userData.velocity.z -= playerspeed;
+        }
+        if ( InputManager.isKeyDown( 83 /*s*/ ) ) {
+            this.player.userData.velocity.z += playerspeed;
+        }
+        if ( InputManager.isKeyDown( 65 /*a*/ ) ) {
+            this.player.userData.velocity.x -= playerspeed;
+        }
+        if ( InputManager.isKeyDown( 68 /*d*/ ) ) {
+            this.player.userData.velocity.x += playerspeed;
+        }
+        if ( InputManager.isKeyDown( 32 /*spacebar*/ ) ) {
+            this.player.userData.velocity.y += playerspeed;
+        }
+        if ( InputManager.isKeyDown( 16 /*shift*/ ) ) {
+            this.player.userData.velocity.y -= playerspeed;
+        }
     }
-    if ( InputManager.isKeyDown( 83 /*s*/ ) ) {
-        this.player.userData.velocity.z += playerspeed;
-    }
-    if ( InputManager.isKeyDown( 65 /*a*/ ) ) {
-        this.player.userData.velocity.x -= playerspeed;
-    }
-    if ( InputManager.isKeyDown( 68 /*d*/ ) ) {
-        this.player.userData.velocity.x += playerspeed;
-    }
-    if ( InputManager.isKeyDown( 32 /*spacebar*/ ) ) {
-        this.player.userData.velocity.y += playerspeed;
-    }
-    if ( InputManager.isKeyDown( 16 /*shift*/ ) ) {
-        this.player.userData.velocity.y -= playerspeed;
-    }
+    else
+    {
+        this.player.userData.velocity.x = 0;
+        this.player.userData.velocity.z = 0;
 
-    if ( InputManager.isKeyPressed( 49 /*1*/ ) ) {
-        this.player.userData.selectedBlock = 1;
-    }
-    if ( InputManager.isKeyPressed( 50 /*2*/ ) ) {
-        this.player.userData.selectedBlock = 2;
-    }
-    if ( InputManager.isKeyPressed( 51 /*3*/ ) ) {
-        this.player.userData.selectedBlock = 3;
+        if ( !this.player.userData.onGround ) {
+            this.player.userData.velocity.y -= 9.81 * delta;
+            if ( this.player.position.y <= 0 ) {
+                this.player.position.y = 0;
+                this.player.userData.velocity.y = 0;
+                this.player.userData.onGround = true;
+            }
+        }
+
+        var speed = playerspeed;
+
+        if ( InputManager.isKeyDown( 16 /*shift*/ ) ) {
+            speed *= 2.5;
+        }
+
+        if ( InputManager.isKeyDown( 87 /*w*/ ) ) {
+            this.player.userData.velocity.z = -speed;
+        }
+        if ( InputManager.isKeyDown( 83 /*s*/ ) ) {
+            this.player.userData.velocity.z = speed;
+        }
+        if ( InputManager.isKeyDown( 65 /*a*/ ) ) {
+            this.player.userData.velocity.x = -speed;
+        }
+        if ( InputManager.isKeyDown( 68 /*d*/ ) ) {
+            this.player.userData.velocity.x = speed;
+        }
+        if ( InputManager.isKeyDown( 32 /*spacebar*/ ) &&
+            this.player.userData.onGround ) {
+            this.player.userData.onGround = false;
+            this.player.userData.velocity.y = 10;
+        }
+
     }
 
     var vel = this.player.userData.velocity.clone().multiplyScalar( delta );
@@ -345,13 +389,23 @@ Game.prototype.update = function( delta ) {
         // Do player collision
         if ( this.player.userData.collide ) {
             this.player.userData.boundingBox.setFromObject( this.player );
+            this.player.userData.onGround = false;
 
             var collision = collisions.collideWithBlocks( this.player.userData.boundingBox, vel );
 
             // Collision detected
             if ( collision.entryTime < 1.0 ) {
                 console.log( collision );
+
                 vel.multiplyScalar( collision.entryTime );
+
+                if ( collision.normal.y ) {
+                    this.player.userData.velocity.y = 0;
+
+                    if ( collision.normal.y === 1 ) {
+                        this.player.userData.onGround = true;
+                    }
+                }
             }
         }
 
