@@ -118,8 +118,31 @@ exports.generateLevel = function() {
 
     this.level = { blocks: [ ], size: { x: SIZE, y: SIZE, z: SIZE } };
 
+    var id = Math.floor( Math.random() * 3 ) + 1;
+
+    for ( var x = 0; x < SIZE; x++ ) {
+        var yArr = [ ];
+        for ( var y = 0; y < SIZE; y++ ) {
+            var zArr = [ ];
+            for ( var z = 0; z < SIZE; z++ ) {
+
+                if ( y < x / ( SIZE / 8 ) || y === 0 ) {
+                    zArr.push( {
+                        id: id,
+                        position: { x: x, y: y, z: z }
+                    } );
+                } else {
+                    zArr.push( undefined );
+                }
+
+            }
+            yArr.push( zArr );
+        }
+        this.level.blocks.push( yArr );
+    }
+
     // TODO: Remove position information
-    var hSize = SIZE / 2;
+    /*var hSize = SIZE / 2;
     for ( var x = 0; x < SIZE; x++ ) {
         var yArr = [ ];
         var x2 = x * x;
@@ -147,9 +170,9 @@ exports.generateLevel = function() {
             yArr.push( zArr );
         }
         this.level.blocks.push( yArr );
-    }
+    }*/
 
-    this.level.spawnpoint = new THREE.Vector3( SIZE, SIZE, SIZE );
+    this.level.spawnpoint = new THREE.Vector3( SIZE - 1, SIZE - 1, SIZE - 1 );
 };
 
 exports.players = players;

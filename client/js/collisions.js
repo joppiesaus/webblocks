@@ -170,6 +170,16 @@ var collisions = {
         var broadBox = this.createBroadBox( a, velocity );
         var face, vel, box;
 
+        var bestCol = {
+            entryTime: 1,
+            normal: new THREE.Vector3(),
+            exitTime: Infinity,
+            invEntry: new THREE.Vector3(),
+            invExit: new THREE.Vector3(),
+            entry: new THREE.Vector3( 1, 1, 1 ),
+            exit: new THREE.Vector3( Infinity, Infinity, Infinity )
+        };
+
         for ( var i = 1; i <= loops; i++ ) {
 
             vel = velocity.clone().divideScalar( loops ).multiplyScalar( i );
@@ -178,25 +188,26 @@ var collisions = {
             var t = [ ];
             if ( vel.y !== 0.0 ) {
                 face = vel.y < 0.0 ? box.min.y : box.max.y;
-                t.push( ( new THREE.Vector3( box.max.x, face, box.max.z ) ).floor() );
-                t.push( ( new THREE.Vector3( box.max.x, face, box.min.z ) ).floor() );
-                t.push( ( new THREE.Vector3( box.min.x, face, box.max.z ) ).floor() );
-                t.push( ( new THREE.Vector3( box.min.x, face, box.min.z ) ).floor() );
+                t.push( ( new THREE.Vector3( box.max.x, face, box.max.z ) ).round() );
+                t.push( ( new THREE.Vector3( box.max.x, face, box.min.z ) ).round() );
+                t.push( ( new THREE.Vector3( box.min.x, face, box.max.z ) ).round() );
+                t.push( ( new THREE.Vector3( box.min.x, face, box.min.z ) ).round() );
             }
             if ( vel.x !== 0.0 ) {
                 face = vel.x < 0.0 ? box.min.x : box.max.x;
-                t.push( ( new THREE.Vector3( face, box.max.y, box.max.z ) ).floor() );
-                t.push( ( new THREE.Vector3( face, box.max.y, box.min.z ) ).floor() );
-                t.push( ( new THREE.Vector3( face, box.min.y, box.max.z ) ).floor() );
-                t.push( ( new THREE.Vector3( face, box.min.y, box.min.z ) ).floor() );
+                t.push( ( new THREE.Vector3( face, box.max.y, box.max.z ) ).round() );
+                t.push( ( new THREE.Vector3( face, box.max.y, box.min.z ) ).round() );
+                t.push( ( new THREE.Vector3( face, box.min.y, box.max.z ) ).round() );
+                t.push( ( new THREE.Vector3( face, box.min.y, box.min.z ) ).round() );
             }
             if ( vel.z !== 0.0 ) {
                 face = vel.z < 0.0 ? box.min.z : box.max.z;
-                t.push( ( new THREE.Vector3( box.max.x, box.max.y, face ) ).floor() );
-                t.push( ( new THREE.Vector3( box.min.x, box.max.y, face ) ).floor() );
-                t.push( ( new THREE.Vector3( box.max.x, box.min.y, face ) ).floor() );
-                t.push( ( new THREE.Vector3( box.min.x, box.min.y, face ) ).floor() );
+                t.push( ( new THREE.Vector3( box.max.x, box.max.y, face ) ).round() );
+                t.push( ( new THREE.Vector3( box.min.x, box.max.y, face ) ).round() );
+                t.push( ( new THREE.Vector3( box.max.x, box.min.y, face ) ).round() );
+                t.push( ( new THREE.Vector3( box.min.x, box.min.y, face ) ).round() );
             }
+
 
             // TODO: Remove duplicates
             var corners = t;
@@ -212,24 +223,25 @@ var collisions = {
 
                 var blockCol = this.blockBoxFromPosition( corners[ j ] );
 
+                //if ( broadBox.intersectsBox( blockCol ) ) {
+                    //return this.sweptAABB( a, blockCol, velocity );
+                //}
+
                 if ( broadBox.intersectsBox( blockCol ) ) {
-                    return this.sweptAABB( a, blockCol, velocity );
+                    // TODO: ^ probably always true...?
+                    var col = this.sweptAABB( a, blockCol, velocity );
+                    if ( col.entryTime < 1.0 && col.entryTime < bestCol.entryTime ) {
+                        bestCol = col;
+                    }
                 }
 
             }
 
+            if ( bestCol.entryTime < 1.0 ) return bestCol;
         }
 
         // No collision found!
-        return {
-            time: 1,
-            normal: new THREE.Vector3(),
-            exitTime: Infinity,
-            invEntry: new THREE.Vector3(),
-            invExit: new THREE.Vector3(),
-            entry: new THREE.Vector3( 1, 1, 1 ),
-            exit: new THREE.Vector3( Infinity, Infinity, Infinity )
-        };
+        return bestCol;
 
     },
 

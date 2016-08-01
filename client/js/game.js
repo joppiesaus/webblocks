@@ -247,16 +247,14 @@ Game.prototype.addBlockAtCrosshair = function() {
         if ( position[ v ] < 0 || position[ v ] >= this.world.level.size[ v ] ) return;
 
         // Check if the block collides with the player
-        if ( this.player.userData.collide /* insert block collision check here */ ) {
+        if ( this.player.userData.collide ) {
 
-            // update this
-            var pbb = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() );
-            pbb.setFromObject( this.player );
+            this.player.userData.boundingBox.setFromObject( this.player );
 
             var bbb = collisions.blockBoxFromPosition( position );
 
             // If it does, do not place the block
-            if ( pbb.intersectsBox( bbb ) ) return;
+            if ( this.player.userData.boundingBox.intersectsBox( bbb ) ) return;
 
         }
 
@@ -389,6 +387,8 @@ Game.prototype.update = function( delta ) {
         // Do player collision
         if ( this.player.userData.collide ) {
             this.player.userData.boundingBox.setFromObject( this.player );
+            //var prevOnGround = this.player.userData.onGround;
+            //console.log(this.player.userData.onGround);
             this.player.userData.onGround = false;
 
             var collision = collisions.collideWithBlocks( this.player.userData.boundingBox, vel );
@@ -396,16 +396,30 @@ Game.prototype.update = function( delta ) {
             // Collision detected
             if ( collision.entryTime < 1.0 ) {
                 console.log( collision );
+                console.log( vel );
 
-                vel.multiplyScalar( collision.entryTime );
 
                 if ( collision.normal.y ) {
                     this.player.userData.velocity.y = 0;
 
                     if ( collision.normal.y === 1 ) {
+
+                        // FIX THIS
+                        /*if ( prevOnGround ) {
+                            vel.y = 0;
+                            collision.entryTime = 1;
+                        }*/
                         this.player.userData.onGround = true;
+
                     }
                 }
+                //if ( collision.normal.y !== 1 ) console.warn("NOT NORMALY 1")
+
+                vel.multiplyScalar( collision.entryTime );
+
+                // Slide!
+                var remainingTime = 1.0 - collision.entryTime;
+                vel.projectOnPlane( collision.normal ).multiplyScalar( remainingTime );
             }
         }
 
