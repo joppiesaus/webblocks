@@ -337,17 +337,17 @@ Game.prototype.update = function( delta ) {
 
         if ( !this.player.userData.onGround ) {
             this.player.userData.velocity.y -= 9.81 * delta;
-            if ( this.player.position.y <= 0 ) {
-                this.player.position.y = 0;
+            if ( this.player.position.y <= 0.5 ) {
+                this.player.position.y = 0.5;
                 this.player.userData.velocity.y = 0;
                 this.player.userData.onGround = true;
             }
         }
 
-        var speed = playerspeed;
+        var speed = 310 * delta;
 
         if ( InputManager.isKeyDown( 16 /*shift*/ ) ) {
-            speed *= 2.5;
+            speed *= 2.2;
         }
 
         if ( InputManager.isKeyDown( 87 /*w*/ ) ) {
@@ -365,7 +365,7 @@ Game.prototype.update = function( delta ) {
         if ( InputManager.isKeyDown( 32 /*spacebar*/ ) &&
             this.player.userData.onGround ) {
             this.player.userData.onGround = false;
-            this.player.userData.velocity.y = 10;
+            this.player.userData.velocity.y = 5;
         }
 
     }
