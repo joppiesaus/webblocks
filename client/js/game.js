@@ -417,9 +417,20 @@ Game.prototype.update = function( delta ) {
 
                 vel.multiplyScalar( collision.entryTime );
 
+                ///////////////////////////// I HAVE NO IDEA WHAT I'M DOING
+
                 // Slide!
                 var remainingTime = 1.0 - collision.entryTime;
-                vel.projectOnPlane( collision.normal ).multiplyScalar( remainingTime );
+                //vel.projectOnPlane( collision.normal ).multiplyScalar( remainingTime );
+                vel.projectOnPlane( collision.normal ).multiplyScalar( 1 + remainingTime );
+                /*var velcpy = vel.clone();
+                console.log(velcpy);
+                velcpy.projectOnVector( collision.normal ).multiplyScalar( remainingTime );
+                console.log(velcpy);
+                vel.projectOnPlane( collision.normal );
+                console.log(vel);
+                vel.add( velcpy );
+                console.log(vel);*/
             }
         }
 
